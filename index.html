@@ -1,304 +1,1586 @@
 <!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>💗 回到我身边</title>
+    <style>
+        :root {
+            --pink-500: #ff5286;
+            --pink-400: #ff7aa2;
+            --pink-600: #e84572;
+            --radius: 20px;
+            --safe-bottom: env(safe-area-inset-bottom, 16px);
+            --safe-top: env(safe-area-inset-top, 16px);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', 'STHeiti', sans-serif;
+            background: #1a1a1a;
+            min-height: 100vh;
+            min-height: 100dvh;
+            color: #fff;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: pan-y;
+            position: relative;
+        }
+
+        /* ========== 飘落花瓣 ========== */
+        .petals-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .petal {
+            position: absolute;
+            top: -60px;
+            animation: fall linear infinite;
+            opacity: 0.5;
+            font-size: 1.2rem;
+            filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.25));
+        }
+        @keyframes fall {
+            0% {
+                transform: translateY(-60px) rotate(0deg) translateX(0px);
+                opacity: 0.6;
+            }
+            25% {
+                transform: translateY(25vh) rotate(90deg) translateX(30px);
+                opacity: 0.5;
+            }
+            50% {
+                transform: translateY(50vh) rotate(180deg) translateX(-25px);
+                opacity: 0.4;
+            }
+            75% {
+                transform: translateY(75vh) rotate(270deg) translateX(15px);
+                opacity: 0.25;
+            }
+            100% {
+                transform: translateY(105vh) rotate(360deg) translateX(-8px);
+                opacity: 0;
+            }
+        }
+
+        /* ========== 页面容器 ========== */
+        .page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            height: 100dvh;
+            display: none;
+            flex-direction: column;
+            z-index: 5;
+        }
+        .page.active {
+            display: flex;
+        }
+
+        /* ========== 主页 ========== */
+        .home-page {
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(180deg,
+                    #2d1520 0%,
+                    #1a0d14 30%,
+                    #0d0d0d 60%,
+                    #1a1018 100%);
+            text-align: center;
+            padding: 40px 20px;
+            gap: 20px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .home-title {
+            font-size: 2.2rem;
+            font-weight: 300;
+            letter-spacing: 3px;
+            color: #ff5286;
+            text-shadow: 0 0 30px rgba(255, 82, 134, 0.5);
+            animation: titleGlow 3s ease-in-out infinite;
+            margin-bottom: 4px;
+        }
+        @keyframes titleGlow {
+            0%,
+            100% {
+                text-shadow: 0 0 20px rgba(255, 82, 134, 0.4);
+            }
+            50% {
+                text-shadow: 0 0 40px rgba(255, 82, 134, 0.8), 0 0 80px rgba(255, 130, 160, 0.4);
+            }
+        }
+        .home-subtitle {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 2px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+            padding: 0 10px;
+        }
+        .home-modules {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 8px;
+        }
+        .home-module-card {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            padding: 14px 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            min-width: 70px;
+            flex: 1;
+            max-width: 100px;
+        }
+        .home-module-card:active {
+            background: rgba(255, 255, 255, 0.14);
+            transform: scale(0.96);
+        }
+        .home-module-card .module-icon {
+            font-size: 1.6rem;
+            margin-bottom: 4px;
+        }
+        .home-module-card .module-label {
+            font-size: 0.68rem;
+            color: rgba(255, 255, 255, 0.6);
+            letter-spacing: 0.5px;
+        }
+        .btn-start {
+            background: linear-gradient(135deg, #ff5286, #ff7aa2);
+            color: #fff;
+            border: none;
+            padding: 16px 48px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1.05rem;
+            font-weight: 600;
+            font-family: inherit;
+            letter-spacing: 2px;
+            transition: all 0.4s;
+            box-shadow: 0 8px 30px rgba(255, 82, 134, 0.35);
+            animation: btnPulse 2.5s ease-in-out infinite;
+            margin-top: 8px;
+        }
+        @keyframes btnPulse {
+            0%,
+            100% {
+                box-shadow: 0 8px 30px rgba(255, 82, 134, 0.35);
+            }
+            50% {
+                box-shadow: 0 12px 45px rgba(255, 82, 134, 0.6);
+            }
+        }
+        .btn-start:active {
+            transform: scale(0.95);
+            box-shadow: 0 4px 15px rgba(255, 82, 134, 0.3);
+        }
+        .home-config-btn {
+            position: absolute;
+            top: max(16px, var(--safe-top));
+            right: 16px;
+            z-index: 20;
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.5);
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        .home-config-btn:active {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* ========== 内容页（轮播） ========== */
+        .content-page {
+            background: #0d0d0d;
+        }
+        .carousel-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
+        .carousel-track {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+            will-change: transform;
+        }
+        .slide {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        .slide-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        .slide-bg img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            filter: brightness(0.5);
+        }
+        .slide-bg video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            filter: brightness(0.5);
+        }
+        .slide-bg .no-media {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(160deg, #2d1520 0%, #1a0d14 40%, #0d0d0d 100%);
+        }
+        .slide-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60%;
+            background: linear-gradient(to top,
+                    rgba(0, 0, 0, 0.9) 0%,
+                    rgba(0, 0, 0, 0.55) 30%,
+                    rgba(0, 0, 0, 0.1) 70%,
+                    transparent 100%);
+            z-index: 2;
+            pointer-events: none;
+        }
+        .slide-text {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 3;
+            padding: 20px 22px calc(100px + var(--safe-bottom));
+            max-height: 55vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .slide-text::-webkit-scrollbar {
+            width: 2px;
+        }
+        .slide-text::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .slide-text::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 8px;
+        }
+        .slide-text .text-inner {
+            font-size: 0.95rem;
+            line-height: 1.9;
+            letter-spacing: 0.8px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+            white-space: pre-wrap;
+            word-break: break-word;
+            padding-bottom: 10px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        .slide-text .text-inner:empty::after {
+            content: '...';
+            color: rgba(255, 255, 255, 0.3);
+            font-style: italic;
+            font-size: 1.3rem;
+        }
+
+        /* ========== 顶部板块标签 ========== */
+        .section-tabs {
+            position: absolute;
+            top: max(12px, var(--safe-top));
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            display: flex;
+            gap: 4px;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 5px 6px;
+            border-radius: 22px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .section-tab {
+            padding: 7px 13px;
+            border-radius: 18px;
+            border: none;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.65);
+            cursor: pointer;
+            font-size: 0.72rem;
+            font-weight: 600;
+            font-family: inherit;
+            transition: all 0.3s;
+            white-space: nowrap;
+            letter-spacing: 0.3px;
+        }
+        .section-tab.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+        .section-tab.config-tab {
+            font-size: 0.9rem;
+            padding: 7px 10px;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+        }
+
+        /* ========== 底部指示器 ========== */
+        .nav-indicators {
+            position: absolute;
+            bottom: calc(70px + var(--safe-bottom));
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            display: flex;
+            gap: 8px;
+        }
+        .nav-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.35);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .nav-dot.active {
+            background: #fff;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            width: 20px;
+            border-radius: 8px;
+        }
+
+        /* ========== 滑动提示 ========== */
+        .swipe-hint {
+            position: absolute;
+            bottom: calc(50px + var(--safe-bottom));
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 18;
+            color: rgba(255, 255, 255, 0.45);
+            font-size: 0.65rem;
+            letter-spacing: 1.5px;
+            pointer-events: none;
+            animation: hintPulse 2.5s ease-in-out infinite;
+        }
+        @keyframes hintPulse {
+            0%,
+            100% {
+                opacity: 0.3;
+            }
+            50% {
+                opacity: 0.8;
+            }
+        }
+
+        /* ========== 音乐指示器 ========== */
+        .music-indicator {
+            position: absolute;
+            bottom: calc(16px + var(--safe-bottom));
+            right: 14px;
+            z-index: 20;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 22px;
+            padding: 8px 14px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .music-indicator .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #4ade80;
+            animation: pulse 1.2s ease-in-out infinite;
+            display: none;
+        }
+        .music-indicator .dot.playing {
+            display: block;
+        }
+        .music-indicator .dot.paused {
+            display: block;
+            background: #fb923c;
+            animation: none;
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.3;
+                transform: scale(1.6);
+            }
+        }
+
+        /* ========== 返回按钮 ========== */
+        .btn-back-home {
+            position: absolute;
+            top: max(50px, calc(var(--safe-top) + 38px));
+            left: 12px;
+            z-index: 20;
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.7);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        .btn-back-home:active {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* ========== 密码弹窗 ========== */
+        .password-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .password-overlay.hidden {
+            display: none;
+        }
+        .password-box {
+            background: rgba(30, 30, 30, 0.9);
+            border-radius: var(--radius);
+            padding: 36px 26px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            max-width: 340px;
+            width: 88%;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .password-box h2 {
+            font-size: 1.2rem;
+            color: #ff5286;
+            margin-bottom: 4px;
+        }
+        .password-box .subtitle {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.4);
+            margin-bottom: 18px;
+        }
+        .password-box input {
+            width: 100%;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 22px;
+            padding: 11px 16px;
+            font-size: 0.95rem;
+            text-align: center;
+            font-family: inherit;
+            letter-spacing: 3px;
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+            transition: all 0.3s;
+            outline: none;
+        }
+        .password-box input:focus {
+            border-color: #ff5286;
+            box-shadow: 0 0 0 3px rgba(255, 82, 134, 0.15);
+        }
+        .password-box .btn-submit {
+            margin-top: 14px;
+            background: #ff5286;
+            color: #fff;
+            border: none;
+            padding: 11px 36px;
+            border-radius: 22px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+        .password-box .btn-submit:active {
+            background: #e84572;
+            transform: scale(0.96);
+        }
+        .password-box .error-msg {
+            color: #f87171;
+            font-size: 0.75rem;
+            margin-top: 8px;
+            display: none;
+        }
+        .password-box .error-msg.show {
+            display: block;
+        }
+        .password-box .btn-cancel {
+            margin-top: 6px;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.4);
+            border: none;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-family: inherit;
+            text-decoration: underline;
+        }
+
+        /* ========== 配置面板 ========== */
+        .config-fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            height: 100dvh;
+            z-index: 500;
+            background: rgba(18, 18, 18, 0.96);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            display: none;
+            padding: 16px;
+        }
+        .config-fullscreen.active {
+            display: block;
+        }
+        .config-inner {
+            max-width: 600px;
+            margin: 0 auto;
+            padding-bottom: 40px;
+        }
+        .config-inner h2 {
+            color: #ff5286;
+            margin-bottom: 18px;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+        .config-group {
+            margin-bottom: 16px;
+            padding: 14px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .config-group h3 {
+            font-size: 0.85rem;
+            color: #ff5286;
+            margin-bottom: 8px;
+        }
+        .config-group label {
+            display: block;
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.4);
+            margin-bottom: 3px;
+            font-weight: 600;
+        }
+        .config-group input,
+        .config-group textarea,
+        .config-group select {
+            width: 100%;
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 9px 12px;
+            font-size: 0.8rem;
+            font-family: inherit;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            transition: all 0.3s;
+            margin-bottom: 6px;
+            resize: vertical;
+        }
+        .config-group input:focus,
+        .config-group textarea:focus,
+        .config-group select:focus {
+            outline: none;
+            border-color: #ff5286;
+            box-shadow: 0 0 0 3px rgba(255, 82, 134, 0.1);
+        }
+        .config-group textarea {
+            min-height: 60px;
+        }
+        .pair-editor {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+            padding: 16px 12px 12px;
+            margin-bottom: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            position: relative;
+        }
+        .pair-editor .pair-number {
+            position: absolute;
+            top: -9px;
+            left: 10px;
+            background: #ff5286;
+            color: #fff;
+            font-size: 0.65rem;
+            padding: 2px 9px;
+            border-radius: 8px;
+            font-weight: 700;
+        }
+        .btn-add-pair {
+            background: transparent;
+            color: #ff5286;
+            border: 1.5px dashed rgba(255, 82, 134, 0.35);
+            padding: 9px 18px;
+            border-radius: 18px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            font-family: inherit;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        .btn-add-pair:active {
+            background: rgba(255, 82, 134, 0.1);
+        }
+        .btn-remove-pair {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            background: rgba(220, 38, 38, 0.15);
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            color: #f87171;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-save-config {
+            background: #ff5286;
+            color: #fff;
+            border: none;
+            padding: 9px 18px;
+            border-radius: 18px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            font-family: inherit;
+        }
+        .btn-generate {
+            background: linear-gradient(135deg, #ff5286, #ff7aa2);
+            color: #fff;
+            border: none;
+            padding: 13px 28px;
+            border-radius: 22px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 700;
+            font-family: inherit;
+            letter-spacing: 1px;
+            display: block;
+            width: 100%;
+            margin-top: 8px;
+        }
+        .btn-generate:active {
+            transform: scale(0.97);
+        }
+        .btn-back-config {
+            background: transparent;
+            color: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 7px 14px;
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-family: inherit;
+            margin-bottom: 14px;
+            display: inline-block;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 10px 22px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            z-index: 999;
+            animation: toastIn 0.3s ease;
+        }
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 飘落花瓣 -->
+    <div class="petals-container" id="petalsContainer"></div>
+
+    <!-- ==================== 主页 ==================== -->
+    <div class="page active" id="pageHome">
+        <div class="home-page">
+            <div class="home-title" id="homeTitle">💗</div>
+            <div class="home-subtitle" id="homeSubtitle">有些话，一直想对你说</div>
+            <div class="home-modules" id="homeModules">
+                <div class="home-module-card" data-section="memories">
+                    <div class="module-icon">💌</div>
+                    <div class="module-label">我们的回忆</div>
+                </div>
+                <div class="home-module-card" data-section="status">
+                    <div class="module-icon">💔</div>
+                    <div class="module-label">目前的状态</div>
+                </div>
+                <div class="home-module-card" data-section="solution">
+                    <div class="module-icon">💡</div>
+                    <div class="module-label">解决办法</div>
+                </div>
+                <div class="home-module-card" data-section="future">
+                    <div class="module-icon">🌈</div>
+                    <div class="module-label">未来会好的</div>
+                </div>
+            </div>
+            <button class="btn-start" id="btnStart">轻触开始</button>
+        </div>
+        <button class="home-config-btn" id="homeConfigBtn" title="配置">⚙</button>
+    </div>
+
+    <!-- ==================== 内容页 ==================== -->
+    <div class="page content-page" id="pageContent">
+        <div class="section-tabs" id="sectionTabs">
+            <button class="section-tab active" data-section="memories">💌 回忆</button>
+            <button class="section-tab" data-section="status">💔 状态</button>
+            <button class="section-tab" data-section="solution">💡 办法</button>
+            <button class="section-tab" data-section="future">🌈 未来</button>
+            <button class="section-tab config-tab" data-section="config" title="配置">⚙</button>
+        </div>
+        <button class="btn-back-home" id="btnBackHome">←</button>
+        <div class="carousel-container" id="carouselContainer">
+            <div class="carousel-track" id="carouselTrack"></div>
+        </div>
+        <div class="nav-indicators" id="navIndicators"></div>
+        <div class="swipe-hint" id="swipeHint">← 左右滑动翻阅 →</div>
+        <div class="music-indicator" id="musicIndicator" title="音乐">
+            <span class="dot" id="musicDot"></span>
+            <span id="musicLabel">🎵</span>
+        </div>
+    </div>
+
+    <!-- ==================== 密码弹窗 ==================== -->
+    <div class="password-overlay hidden" id="passwordOverlay">
+        <div class="password-box">
+            <h2>🔐 密码</h2>
+            <p class="subtitle">进入配置需验证</p>
+            <input type="password" id="passwordInput" placeholder="输入密码" maxlength="20">
+            <div class="error-msg" id="passwordError">❌ 密码错误</div>
+            <button class="btn-submit" id="btnPasswordSubmit">确 认</button>
+            <button class="btn-cancel" id="btnPasswordCancel">取消</button>
+        </div>
+    </div>
+
+    <!-- ==================== 配置面板 ==================== -->
+    <div class="config-fullscreen" id="configFullscreen">
+        <div class="config-inner">
+            <button class="btn-back-config" id="btnBackConfig">← 返回</button>
+            <h2>⚙️ 配置面板</h2>
+
+            <!-- 主页配置 -->
+            <div class="config-group">
+                <h3>🏠 主页设置</h3>
+                <label>主页大标题</label>
+                <input type="text" id="configHomeTitle" value="💗" placeholder="💗">
+                <label>主页副标题/描述文字</label>
+                <textarea id="configHomeSubtitle" placeholder="有些话，一直想对你说"></textarea>
+            </div>
+
+            <!-- 板块选择 -->
+            <div class="config-group">
+                <h3>📝 选择编辑板块</h3>
+                <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                    <button class="section-tab config-target-btn active" data-target="memories" style="font-size:0.7rem;">💌 回忆</button>
+                    <button class="section-tab config-target-btn" data-target="status" style="font-size:0.7rem;">💔 状态</button>
+                    <button class="section-tab config-target-btn" data-target="solution" style="font-size:0.7rem;">💡 办法</button>
+                    <button class="section-tab config-target-btn" data-target="future" style="font-size:0.7rem;">🌈 未来</button>
+                </div>
+            </div>
+
+            <!-- 图文对编辑 -->
+            <div class="config-group">
+                <h3>🖼️ 图文对</h3>
+                <div id="pairsEditor"></div>
+                <button class="btn-add-pair" id="btnAddPair">＋ 添加</button>
+            </div>
+
+            <!-- 背景音乐 -->
+            <div class="config-group">
+                <h3>🎵 背景音乐</h3>
+                <label>网易云 mp3 直链</label>
+                <input type="text" id="configMusicUrl" value="https://music.163.com/song/media/outer/url?id=3356010050.mp3" placeholder="https://music.163.com/song/media/outer/url?id=xxxxxx.mp3">
+                <div style="margin-top:6px;display:flex;gap:6px;align-items:center;">
+                    <button class="btn-save-config" id="btnPreviewMusic">🔊 试听</button>
+                    <span id="musicStatus" style="font-size:0.7rem;color:rgba(255,255,255,0.4);"></span>
+                </div>
+            </div>
+
+            <button class="btn-generate" id="btnGenerate">📥 保存并生成最终页面</button>
+        </div>
+    </div>
+
+    <audio id="bgMusic" loop style="display:none;"></audio>
+
+    <script>
+        (function() {
+            const CONFIG_PASSWORD = '789102';
+            let isConfigUnlocked = false;
+
+            // DOM
+            const pageHome = document.getElementById('pageHome');
+            const pageContent = document.getElementById('pageContent');
+            const homeTitle = document.getElementById('homeTitle');
+            const homeSubtitle = document.getElementById('homeSubtitle');
+            const homeModules = document.getElementById('homeModules');
+            const btnStart = document.getElementById('btnStart');
+            const btnBackHome = document.getElementById('btnBackHome');
+            const homeConfigBtn = document.getElementById('homeConfigBtn');
+            const carouselTrack = document.getElementById('carouselTrack');
+            const carouselContainer = document.getElementById('carouselContainer');
+            const navIndicators = document.getElementById('navIndicators');
+            const swipeHint = document.getElementById('swipeHint');
+            const sectionTabs = document.querySelectorAll('#sectionTabs .section-tab[data-section]');
+            const passwordOverlay = document.getElementById('passwordOverlay');
+            const passwordInput = document.getElementById('passwordInput');
+            const passwordError = document.getElementById('passwordError');
+            const btnPasswordSubmit = document.getElementById('btnPasswordSubmit');
+            const btnPasswordCancel = document.getElementById('btnPasswordCancel');
+            const configFullscreen = document.getElementById('configFullscreen');
+            const configTargetBtns = document.querySelectorAll('.config-target-btn');
+            const pairsEditor = document.getElementById('pairsEditor');
+            const btnAddPair = document.getElementById('btnAddPair');
+            const configMusicUrl = document.getElementById('configMusicUrl');
+            const configHomeTitle = document.getElementById('configHomeTitle');
+            const configHomeSubtitle = document.getElementById('configHomeSubtitle');
+            const btnGenerate = document.getElementById('btnGenerate');
+            const btnPreviewMusic = document.getElementById('btnPreviewMusic');
+            const musicStatus = document.getElementById('musicStatus');
+            const bgMusic = document.getElementById('bgMusic');
+            const btnBackConfig = document.getElementById('btnBackConfig');
+            const musicIndicator = document.getElementById('musicIndicator');
+            const musicDot = document.getElementById('musicDot');
+            const musicLabel = document.getElementById('musicLabel');
+
+            let currentSection = 'memories';
+            let currentConfigTarget = 'memories';
+            let currentSlideIndex = 0;
+            let allSlides = [];
+            let sectionIndexMap = {};
+            let musicStarted = false;
+
+            const defaultData = {
+                homeTitle: '💗',
+                homeSubtitle: '有些话，一直想对你说',
+                memories: {
+                    pairs: [
+                        { type: 'image', url: '', text: '还记得我们第一次见面吗？\n那天阳光很好，你穿了一件我永远忘不了的衣服。' },
+                        { type: 'image', url: '', text: '一起走过的那些日子，\n每一个瞬间都刻在我心里。' },
+                    ],
+                },
+                status: {
+                    pairs: [
+                        { type: 'image', url: '', text: '我们分开了...\n但这不代表我们之间的感情消失了。' },
+                        { type: 'image', url: '', text: '我每天都在想你，\n想知道你过得好不好。' },
+                    ],
+                },
+                solution: {
+                    pairs: [
+                        { type: 'image', url: '', text: '我想了很多，\n我知道问题出在哪里了。' },
+                        { type: 'image', url: '', text: '我会改，真的会改。\n不是因为我想挽回你，而是因为我想成为更好的人。' },
+                    ],
+                },
+                future: {
+                    pairs: [
+                        { type: 'image', url: '', text: '我相信我们还有未来。' },
+                        { type: 'image', url: '', text: '给我一个机会，\n让我们重新开始，好吗？💗' },
+                    ],
+                },
+                musicUrl: 'https://music.163.com/song/media/outer/url?id=3356010050.mp3',
+            };
+
+            function loadData() {
+                const saved = localStorage.getItem('lovePageData_v5');
+                if (saved) {
+                    try {
+                        const parsed = JSON.parse(saved);
+                        const merged = JSON.parse(JSON.stringify(defaultData));
+                        for (const key of Object.keys(merged)) {
+                            if (parsed[key]) {
+                                if (key === 'musicUrl' || key === 'homeTitle' || key === 'homeSubtitle')
+                                    merged[key] = parsed[key];
+                                else if (parsed[key].pairs && Array.isArray(parsed[key].pairs))
+                                    merged[key].pairs = parsed[key].pairs;
+                            }
+                        }
+                        return merged;
+                    } catch (e) {}
+                }
+                return JSON.parse(JSON.stringify(defaultData));
+            }
+
+            function saveData(data) { localStorage.setItem('lovePageData_v5', JSON.stringify(data)); }
+            let pageData = loadData();
+
+            // ============ 更新主页 ============
+            function updateHomePage() {
+                homeTitle.textContent = pageData.homeTitle || '💗';
+                homeSubtitle.textContent = pageData.homeSubtitle || '';
+            }
+
+            // ============ 构建幻灯片 ============
+            function buildAllSlides() {
+                allSlides = [];
+                sectionIndexMap = {};
+                ['memories', 'status', 'solution', 'future'].forEach(section => {
+                    sectionIndexMap[section] = { start: allSlides.length, count: pageData[section].pairs
+                            .length };
+                    pageData[section].pairs.forEach(pair => allSlides.push({ section, type: pair.type,
+                        url: pair.url, text: pair.text }));
+                });
+            }
+
+            function renderCarousel() {
+                buildAllSlides();
+                carouselTrack.innerHTML = '';
+                navIndicators.innerHTML = '';
+                allSlides.forEach((slide, index) => {
+                    const slideDiv = document.createElement('div');
+                    slideDiv.className = 'slide';
+                    slideDiv.style.left = (index * 100) + '%';
+                    const bgDiv = document.createElement('div');
+                    bgDiv.className = 'slide-bg';
+                    if (slide.url && slide.url.trim()) {
+                        if (slide.type === 'video') {
+                            const video = document.createElement('video');
+                            video.src = slide.url.trim();
+                            video.loop = true;
+                            video.muted = true;
+                            video.playsinline = true;
+                            video.autoplay = true;
+                            video.setAttribute('playsinline', '');
+                            video.setAttribute('webkit-playsinline', '');
+                            bgDiv.appendChild(video);
+                        } else {
+                            const img = document.createElement('img');
+                            img.src = slide.url.trim();
+                            img.alt = '';
+                            bgDiv.appendChild(img);
+                        }
+                    } else {
+                        const noMedia = document.createElement('div');
+                        noMedia.className = 'no-media';
+                        bgDiv.appendChild(noMedia);
+                    }
+                    slideDiv.appendChild(bgDiv);
+                    const overlay = document.createElement('div');
+                    overlay.className = 'slide-overlay';
+                    slideDiv.appendChild(overlay);
+                    const textDiv = document.createElement('div');
+                    textDiv.className = 'slide-text';
+                    textDiv.innerHTML = '<div class="text-inner">' + escapeHTML(slide.text || '') + '</div>';
+                    slideDiv.appendChild(textDiv);
+                    carouselTrack.appendChild(slideDiv);
+                    const dot = document.createElement('span');
+                    dot.className = 'nav-dot';
+                    dot.addEventListener('click', () => goToSlide(index));
+                    navIndicators.appendChild(dot);
+                });
+                updateCarouselPosition(0);
+                updateIndicators();
+                updateActiveTab();
+            }
+
+            function updateCarouselPosition(anim) {
+                if (!anim) carouselTrack.style.transition = 'none';
+                else carouselTrack.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1)';
+                carouselTrack.style.transform = 'translateX(-' + (currentSlideIndex * 100) + '%)';
+                if (!anim) requestAnimationFrame(() => { carouselTrack.style.transition =
+                        'transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1)'; });
+                updateIndicators();
+                updateActiveTab();
+                playCurrentVideo();
+            }
+
+            function updateIndicators() {
+                const dots = navIndicators.querySelectorAll('.nav-dot');
+                dots.forEach((d, i) => d.classList.toggle('active', i === currentSlideIndex));
+            }
+
+            function updateActiveTab() {
+                const slide = allSlides[currentSlideIndex];
+                if (slide) {
+                    currentSection = slide.section;
+                    sectionTabs.forEach(t => {
+                        t.classList.remove('active');
+                        if (t.dataset.section === slide.section) t.classList.add('active');
+                    });
+                }
+            }
+
+            function playCurrentVideo() {
+                const allVideos = carouselTrack.querySelectorAll('video');
+                allVideos.forEach((v, i) => {
+                    if (i === currentSlideIndex) v.play().catch(() => {});
+                    else v.pause();
+                });
+            }
+
+            function goToSlide(index) {
+                if (index < 0) index = 0;
+                if (index >= allSlides.length) index = allSlides.length - 1;
+                currentSlideIndex = index;
+                updateCarouselPosition(true);
+            }
+
+            // ============ 滑动 ============
+            let tsX = 0,
+                tsY = 0,
+                tcX = 0,
+                isDragging = false,
+                dragOffset = 0;
+            carouselContainer.addEventListener('touchstart', e => {
+                tsX = e.touches[0].clientX;
+                tsY = e.touches[0].clientY;
+                tcX = tsX;
+                isDragging = true;
+                dragOffset = 0;
+                carouselTrack.style.transition = 'none';
+                swipeHint.style.opacity = '0';
+            }, { passive: true });
+            carouselContainer.addEventListener('touchmove', e => {
+                if (!isDragging) return;
+                tcX = e.touches[0].clientX;
+                dragOffset = tcX - tsX;
+                const bo = -currentSlideIndex * 100;
+                carouselTrack.style.transform = 'translateX(' + (bo + (dragOffset / carouselContainer
+                    .offsetWidth) * 100) + '%)';
+            }, { passive: true });
+            carouselContainer.addEventListener('touchend', () => {
+                if (!isDragging) return;
+                isDragging = false;
+                carouselTrack.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1)';
+                const t = 35;
+                if (dragOffset < -t && currentSlideIndex < allSlides.length - 1) currentSlideIndex++;
+                else if (dragOffset > t && currentSlideIndex > 0) currentSlideIndex--;
+                updateCarouselPosition(true);
+                dragOffset = 0;
+                setTimeout(() => { swipeHint.style.opacity = '1'; }, 1500);
+            });
+
+            // ============ 板块标签点击 ============
+            sectionTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const section = tab.dataset.section;
+                    if (section === 'config') {
+                        if (!isConfigUnlocked) { showPasswordOverlay(); return; }
+                        openConfigFullscreen();
+                        return;
+                    }
+                    const map = sectionIndexMap[section];
+                    if (map && map.count > 0) {
+                        currentSlideIndex = map.start;
+                        updateCarouselPosition(true);
+                    }
+                });
+            });
+
+            // ============ 主页模块卡片点击 ============
+            homeModules.addEventListener('click', (e) => {
+                const card = e.target.closest('.home-module-card');
+                if (!card) return;
+                const section = card.dataset.section;
+                if (!section) return;
+                // 进入内容页
+                pageHome.classList.remove('active');
+                pageContent.classList.add('active');
+                startMusic();
+                const map = sectionIndexMap[section];
+                if (map && map.count > 0) {
+                    currentSlideIndex = map.start;
+                    updateCarouselPosition(true);
+                }
+                // 更新内容页标签
+                sectionTabs.forEach(t => {
+                    t.classList.remove('active');
+                    if (t.dataset.section === section) t.classList.add('active');
+                });
+            });
+
+            // ============ 主页 → 内容页 ============
+            btnStart.addEventListener('click', () => {
+                pageHome.classList.remove('active');
+                pageContent.classList.add('active');
+                startMusic();
+                const map = sectionIndexMap['memories'];
+                if (map && map.count > 0) {
+                    currentSlideIndex = map.start;
+                    updateCarouselPosition(true);
+                }
+            });
+
+            btnBackHome.addEventListener('click', () => {
+                pageContent.classList.remove('active');
+                pageHome.classList.add('active');
+                bgMusic.pause();
+                updateMusicUI('paused');
+            });
+
+            // ============ 音乐 ============
+            function loadMusicUrl() {
+                if (pageData.musicUrl?.trim()) { bgMusic.src = pageData.musicUrl.trim();
+                    bgMusic.load(); }
+            }
+
+            function startMusic() {
+                if (musicStarted) return;
+                musicStarted = true;
+                if (!bgMusic.src && pageData.musicUrl) { bgMusic.src = pageData.musicUrl;
+                    bgMusic.load(); }
+                bgMusic.play().then(() => updateMusicUI('playing')).catch(() => updateMusicUI('blocked'));
+            }
+
+            function toggleMusic() {
+                if (bgMusic.paused || bgMusic.ended) {
+                    if (!bgMusic.src && pageData.musicUrl) { bgMusic.src = pageData.musicUrl;
+                        bgMusic.load(); }
+                    bgMusic.play().then(() => updateMusicUI('playing')).catch(() => updateMusicUI('blocked'));
+                } else { bgMusic.pause();
+                    updateMusicUI('paused'); }
+            }
+
+            function updateMusicUI(state) {
+                musicDot.classList.remove('playing', 'paused');
+                switch (state) {
+                    case 'playing':
+                        musicDot.classList.add('playing');
+                        break;
+                    case 'paused':
+                        musicDot.classList.add('paused');
+                        break;
+                    case 'blocked':
+                        musicDot.classList.add('paused');
+                        break;
+                }
+            }
+            bgMusic.addEventListener('play', () => updateMusicUI('playing'));
+            bgMusic.addEventListener('pause', () => { if (bgMusic.src && !bgMusic.ended) updateMusicUI(
+                'paused'); });
+            musicIndicator.addEventListener('click', toggleMusic);
+
+            // ============ 密码 ============
+            function showPasswordOverlay() {
+                passwordOverlay.classList.remove('hidden');
+                passwordInput.value = '';
+                passwordError.classList.remove('show');
+                setTimeout(() => passwordInput.focus(), 100);
+            }
+
+            function hidePasswordOverlay() {
+                passwordOverlay.classList.add('hidden');
+                passwordInput.value = '';
+                passwordError.classList.remove('show');
+            }
+            btnPasswordSubmit.addEventListener('click', verifyPassword);
+            passwordInput.addEventListener('keydown', e => { if (e.key === 'Enter') verifyPassword(); });
+            btnPasswordCancel.addEventListener('click', hidePasswordOverlay);
+            passwordOverlay.addEventListener('click', e => { if (e.target === passwordOverlay)
+                hidePasswordOverlay(); });
+
+            function verifyPassword() {
+                if (passwordInput.value === CONFIG_PASSWORD) {
+                    isConfigUnlocked = true;
+                    hidePasswordOverlay();
+                    openConfigFullscreen();
+                    showToast('✅ 密码正确');
+                } else {
+                    passwordError.classList.add('show');
+                    passwordInput.value = '';
+                    passwordInput.focus();
+                }
+            }
+
+            // 主页配置按钮
+            homeConfigBtn.addEventListener('click', () => {
+                if (!isConfigUnlocked) { showPasswordOverlay(); return; }
+                openConfigFullscreen();
+            });
+
+            // ============ 配置面板 ============
+            function openConfigFullscreen() {
+                configFullscreen.classList.add('active');
+                loadConfigEditor(currentConfigTarget);
+                configMusicUrl.value = pageData.musicUrl || '';
+                configHomeTitle.value = pageData.homeTitle || '💗';
+                configHomeSubtitle.value = pageData.homeSubtitle || '';
+            }
+
+            function closeConfigFullscreen() { configFullscreen.classList.remove('active'); }
+            btnBackConfig.addEventListener('click', closeConfigFullscreen);
+
+            configTargetBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    configTargetBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentConfigTarget = btn.dataset.target;
+                    loadConfigEditor(currentConfigTarget);
+                });
+            });
+
+            function loadConfigEditor(targetKey) {
+                const pairs = pageData[targetKey].pairs || [];
+                pairsEditor.innerHTML = '';
+                pairs.forEach((pair, index) => pairsEditor.appendChild(createPairEditor(pair, index)));
+                if (pairs.length === 0) {
+                    pageData[targetKey].pairs = [{ type: 'image', url: '', text: '' }];
+                    pairsEditor.appendChild(createPairEditor(pageData[targetKey].pairs[0], 0));
+                }
+            }
+
+            function createPairEditor(pair, index) {
+                const div = document.createElement('div');
+                div.className = 'pair-editor';
+                div.innerHTML = `
+                    <span class="pair-number">#${index+1}</span>
+                    ${index>0?'<button class="btn-remove-pair">×</button>':''}
+                    <label>类型</label>
+                    <select class="pair-type">
+                        <option value="image" ${pair.type==='image'?'selected':''}>🖼️ 图片</option>
+                        <option value="video" ${pair.type==='video'?'selected':''}>🎬 视频</option>
+                    </select>
+                    <label>URL</label>
+                    <input type="text" class="pair-url" value="${escapeAttr(pair.url||'')}" placeholder="https://...">
+                    <label>文字</label>
+                    <textarea class="pair-text" placeholder="输入文字...">${escapeHTML(pair.text||'')}</textarea>
+                `;
+                const removeBtn = div.querySelector('.btn-remove-pair');
+                if (removeBtn) removeBtn.addEventListener('click', () => {
+                    if (pageData[currentConfigTarget].pairs.length > 1) {
+                        pageData[currentConfigTarget].pairs.splice(index, 1);
+                        loadConfigEditor(currentConfigTarget);
+                    } else showToast('⚠️ 至少保留一个');
+                });
+                return div;
+            }
+
+            function escapeAttr(s) { return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g,
+                    '&lt;').replace(/>/g, '&gt;'); }
+
+            function escapeHTML(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+            btnAddPair.addEventListener('click', () => {
+                pageData[currentConfigTarget].pairs.push({ type: 'image', url: '', text: '' });
+                loadConfigEditor(currentConfigTarget);
+            });
+
+            function collectPairsFromEditor() {
+                const divs = pairsEditor.querySelectorAll('.pair-editor');
+                const pairs = [];
+                divs.forEach(div => pairs.push({
+                    type: div.querySelector('.pair-type')?.value || 'image',
+                    url: div.querySelector('.pair-url')?.value?.trim() || '',
+                    text: div.querySelector('.pair-text')?.value || '',
+                }));
+                return pairs;
+            }
+
+            btnPreviewMusic.addEventListener('click', () => {
+                const url = configMusicUrl.value.trim();
+                if (!url) { if (musicStatus) { musicStatus.textContent = '⚠️ 请输入URL';
+                        musicStatus.style.color = '#f87171'; } return; }
+                bgMusic.src = url;
+                bgMusic.load();
+                bgMusic.play().then(() => { if (musicStatus) { musicStatus.textContent = '🔊 试听中';
+                        musicStatus.style.color = '#4ade80'; } updateMusicUI('playing'); }).catch(
+                    () => { if (musicStatus) { musicStatus.textContent = '❌ 无法播放';
+                            musicStatus.style.color = '#f87171'; } });
+            });
+
+            function saveCurrentConfig() {
+                pageData[currentConfigTarget].pairs = collectPairsFromEditor();
+                pageData.musicUrl = configMusicUrl.value.trim();
+                pageData.homeTitle = configHomeTitle.value.trim() || '💗';
+                pageData.homeSubtitle = configHomeSubtitle.value.trim();
+                saveData(pageData);
+                renderCarousel();
+                updateHomePage();
+                const map = sectionIndexMap[currentSection];
+                if (map && map.count > 0) { currentSlideIndex = map.start;
+                    updateCarouselPosition(true); }
+                loadMusicUrl();
+                if (musicStarted && pageData.musicUrl?.trim()) {
+                    bgMusic.src = pageData.musicUrl.trim();
+                    bgMusic.load();
+                    bgMusic.play().then(() => updateMusicUI('playing')).catch(() => {});
+                }
+            }
+
+            btnGenerate.addEventListener('click', () => {
+                saveCurrentConfig();
+                const embeddedData = JSON.stringify(pageData, null, 6).replace(/\\/g, '\\\\').replace(
+                    /`/g, '\\`').replace(/\$/g, '\\$');
+                const finalHTML = generateFinalHTML(embeddedData);
+                const blob = new Blob([finalHTML], { type: 'text/html;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'love-page.html';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast('✅ 已下载！');
+            });
+
+            function generateFinalHTML(embeddedData) {
+                return `<!DOCTYPE html>
         <html lang="zh-CN">
         <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
         <title>💗 回到我身边</title>
         <style>
-            :root {
-                --pink-50:#fff1f5;--pink-100:#ffe4ec;--pink-200:#ffc8da;--pink-300:#ffa3bf;
-                --pink-400:#ff7aa2;--pink-500:#ff5286;--pink-600:#e84572;--white:#ffffff;
-                --text:#4a3040;--text-light:#8b6b7d;--shadow:0 4px 20px rgba(255,130,160,0.2);
-                --shadow-lg:0 10px 40px rgba(255,130,160,0.25);--radius:20px;--radius-sm:12px;
-            }
-            *{margin:0;padding:0;box-sizing:border-box;}
-            body{
-                font-family:'PingFang SC','Noto Sans SC','Microsoft YaHei','STHeiti',sans-serif;
-                background:linear-gradient(180deg,#ffe4ec 0%,#ffd4e0 15%,#ffe8f0 30%,#fff0f5 50%,#ffe4ec 70%,#ffdce8 100%);
-                min-height:100vh;color:var(--text);position:relative;overflow-x:hidden;cursor:default;
-            }
-            .petals-container{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;}
-            .petal{position:absolute;top:-60px;animation:fall linear infinite;opacity:0.7;font-size:1.5rem;}
-            @keyframes fall{
-                0%{transform:translateY(-60px) rotate(0deg) translateX(0px);opacity:0.8;}
-                25%{transform:translateY(25vh) rotate(90deg) translateX(40px);opacity:0.7;}
-                50%{transform:translateY(50vh) rotate(180deg) translateX(-30px);opacity:0.6;}
-                75%{transform:translateY(75vh) rotate(270deg) translateX(20px);opacity:0.4;}
-                100%{transform:translateY(105vh) rotate(360deg) translateX(-10px);opacity:0;}
-            }
-            .navbar{
-                position:sticky;top:0;z-index:100;
-                background:rgba(255,255,255,0.75);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-                border-bottom:1px solid rgba(255,180,200,0.4);padding:12px 20px;
-                display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;
-            }
-            .nav-btn{
-                padding:10px 20px;border-radius:25px;border:1.5px solid var(--pink-300);
-                background:var(--white);color:var(--pink-500);cursor:pointer;
-                font-size:0.9rem;font-weight:600;transition:all 0.3s;font-family:inherit;white-space:nowrap;letter-spacing:0.5px;
-            }
-            .nav-btn:hover{background:var(--pink-100);border-color:var(--pink-400);transform:translateY(-1px);box-shadow:var(--shadow);}
-            .nav-btn.active{background:var(--pink-500);color:#fff;border-color:var(--pink-500);box-shadow:0 4px 16px rgba(255,82,134,0.4);}
-            .main-container{max-width:750px;margin:0 auto;padding:24px 16px 80px;position:relative;z-index:1;}
-            .section{display:none;animation:fadeSlideIn 0.5s ease;}
-            .section.active{display:block;}
-            @keyframes fadeSlideIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
-            .content-block{
-                background:rgba(255,255,255,0.8);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-                border-radius:var(--radius);padding:24px;margin-bottom:20px;
-                border:1px solid rgba(255,200,220,0.5);box-shadow:var(--shadow);transition:all 0.3s;
-                display:flex;flex-direction:column;gap:16px;
-            }
-            .content-block:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px);}
-            .content-block .block-media{width:100%;border-radius:var(--radius-sm);overflow:hidden;background:#fce4ec;display:none;}
-            .content-block .block-media.has-media{display:block;}
-            .content-block .block-media img{width:100%;height:auto;display:block;border-radius:var(--radius-sm);max-height:400px;object-fit:cover;}
-            .content-block .block-media video{width:100%;height:auto;display:block;border-radius:var(--radius-sm);max-height:350px;object-fit:contain;background:#000;}
-            .content-block .block-text{line-height:1.8;font-size:0.95rem;color:var(--text);white-space:pre-wrap;word-break:break-word;}
-            .section-title{text-align:center;margin-bottom:24px;}
-            .section-title h2{font-size:1.5rem;color:var(--pink-500);display:inline-flex;align-items:center;gap:8px;letter-spacing:1px;}
-            .section-title h2 .icon{font-size:1.8rem;}
-            .music-indicator{
-                position:fixed;bottom:20px;right:20px;z-index:150;
-                background:rgba(255,255,255,0.85);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-                border-radius:25px;padding:10px 18px;border:1px solid rgba(255,200,220,0.5);
-                box-shadow:var(--shadow);display:flex;align-items:center;gap:8px;
-                font-size:0.8rem;font-weight:600;color:var(--pink-500);cursor:pointer;transition:all 0.3s;
-            }
-            .music-indicator:hover{box-shadow:var(--shadow-lg);}
-            .music-indicator .dot{width:8px;height:8px;border-radius:50%;background:#16a34a;animation:pulse 1.2s ease-in-out infinite;display:none;}
-            .music-indicator .dot.playing{display:block;}
-            .music-indicator .dot.paused{display:block;background:#ea580c;animation:none;}
-            @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.4;transform:scale(1.6);}}
-            .hidden-audio{display:none;}
-            @media(max-width:600px){
-                .content-block{padding:16px;gap:12px;}
-                .nav-btn{padding:8px 14px;font-size:0.78rem;}
-                .navbar{gap:4px;padding:10px 10px;}
-                .music-indicator{bottom:12px;right:12px;padding:8px 14px;font-size:0.7rem;}
-            }
+            :root{--safe-bottom:env(safe-area-inset-bottom,16px);--safe-top:env(safe-area-inset-top,16px)}
+            *{margin:0;padding:0;box-sizing:border-box}
+            body{font-family:'PingFang SC','Noto Sans SC','Microsoft YaHei','STHeiti',sans-serif;background:#1a1a1a;min-height:100vh;min-height:100dvh;color:#fff;overflow:hidden;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;touch-action:pan-y}
+            .petals-container{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10}
+            .petal{position:absolute;top:-60px;animation:fall linear infinite;opacity:0.5;font-size:1.2rem;filter:drop-shadow(0 0 3px rgba(255,255,255,0.25))}
+            @keyframes fall{0%{transform:translateY(-60px) rotate(0deg) translateX(0px);opacity:0.6}25%{transform:translateY(25vh) rotate(90deg) translateX(30px);opacity:0.5}50%{transform:translateY(50vh) rotate(180deg) translateX(-25px);opacity:0.4}75%{transform:translateY(75vh) rotate(270deg) translateX(15px);opacity:0.25}100%{transform:translateY(105vh) rotate(360deg) translateX(-8px);opacity:0}}
+            .page{position:fixed;top:0;left:0;width:100%;height:100%;height:100dvh;display:none;flex-direction:column;z-index:5}
+            .page.active{display:flex}
+            .home-page{justify-content:center;align-items:center;background:linear-gradient(180deg,#2d1520 0%,#1a0d14 30%,#0d0d0d 60%,#1a1018 100%);text-align:center;padding:40px 20px;gap:20px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+            .home-title{font-size:2.2rem;font-weight:300;letter-spacing:3px;color:#ff5286;text-shadow:0 0 30px rgba(255,82,134,0.5);animation:titleGlow 3s ease-in-out infinite;margin-bottom:4px}
+            @keyframes titleGlow{0%,100%{text-shadow:0 0 20px rgba(255,82,134,0.4)}50%{text-shadow:0 0 40px rgba(255,82,134,0.8),0 0 80px rgba(255,130,160,0.4)}}
+            .home-subtitle{font-size:0.85rem;color:rgba(255,255,255,0.5);letter-spacing:2px;line-height:1.6;white-space:pre-wrap;word-break:break-word;padding:0 10px}
+            .home-modules{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:8px}
+            .home-module-card{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:14px 18px;cursor:pointer;transition:all 0.3s;text-align:center;min-width:70px;flex:1;max-width:100px}
+            .home-module-card:active{background:rgba(255,255,255,0.14);transform:scale(0.96)}
+            .home-module-card .module-icon{font-size:1.6rem;margin-bottom:4px}
+            .home-module-card .module-label{font-size:0.68rem;color:rgba(255,255,255,0.6);letter-spacing:0.5px}
+            .btn-start{background:linear-gradient(135deg,#ff5286,#ff7aa2);color:#fff;border:none;padding:16px 48px;border-radius:30px;cursor:pointer;font-size:1.05rem;font-weight:600;font-family:inherit;letter-spacing:2px;transition:all 0.4s;box-shadow:0 8px 30px rgba(255,82,134,0.35);animation:btnPulse 2.5s ease-in-out infinite;margin-top:8px}
+            @keyframes btnPulse{0%,100%{box-shadow:0 8px 30px rgba(255,82,134,0.35)}50%{box-shadow:0 12px 45px rgba(255,82,134,0.6)}}
+            .btn-start:active{transform:scale(0.95)}
+            .content-page{background:#0d0d0d}
+            .carousel-container{flex:1;position:relative;overflow:hidden;width:100%}
+            .carousel-track{position:absolute;top:0;left:0;width:100%;height:100%;transition:transform 0.5s cubic-bezier(0.25,0.1,0.25,1);will-change:transform}
+            .slide{position:absolute;top:0;width:100%;height:100%;overflow:hidden}
+            .slide-bg{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1}
+            .slide-bg img{width:100%;height:100%;object-fit:cover;display:block;filter:brightness(0.5)}
+            .slide-bg video{width:100%;height:100%;object-fit:cover;display:block;filter:brightness(0.5)}
+            .slide-bg .no-media{width:100%;height:100%;background:linear-gradient(160deg,#2d1520,#1a0d14,#0d0d0d)}
+            .slide-overlay{position:absolute;bottom:0;left:0;width:100%;height:60%;background:linear-gradient(to top,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0.55) 30%,rgba(0,0,0,0.1) 70%,transparent 100%);z-index:2;pointer-events:none}
+            .slide-text{position:absolute;bottom:0;left:0;width:100%;z-index:3;padding:20px 22px calc(100px + var(--safe-bottom));max-height:55vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+            .slide-text::-webkit-scrollbar{width:2px}
+            .slide-text::-webkit-scrollbar-track{background:transparent}
+            .slide-text::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.25);border-radius:8px}
+            .slide-text .text-inner{font-size:0.95rem;line-height:1.9;letter-spacing:0.8px;text-shadow:0 2px 8px rgba(0,0,0,0.6);white-space:pre-wrap;word-break:break-word;padding-bottom:10px;color:rgba(255,255,255,0.9)}
+            .section-tabs{position:absolute;top:max(12px,var(--safe-top));left:50%;transform:translateX(-50%);z-index:20;display:flex;gap:4px;background:rgba(0,0,0,0.45);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:5px 6px;border-radius:22px;border:1px solid rgba(255,255,255,0.15)}
+            .section-tab{padding:7px 13px;border-radius:18px;border:none;background:transparent;color:rgba(255,255,255,0.65);cursor:pointer;font-size:0.72rem;font-weight:600;font-family:inherit;transition:all 0.3s;white-space:nowrap;letter-spacing:0.3px}
+            .section-tab.active{background:rgba(255,255,255,0.2);color:#fff}
+            .nav-indicators{position:absolute;bottom:calc(70px + var(--safe-bottom));left:50%;transform:translateX(-50%);z-index:20;display:flex;gap:8px}
+            .nav-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.35);cursor:pointer;transition:all 0.3s}
+            .nav-dot.active{background:#fff;box-shadow:0 0 10px rgba(255,255,255,0.5);width:20px;border-radius:8px}
+            .swipe-hint{position:absolute;bottom:calc(50px + var(--safe-bottom));left:50%;transform:translateX(-50%);z-index:18;color:rgba(255,255,255,0.45);font-size:0.65rem;letter-spacing:1.5px;pointer-events:none;animation:hintPulse 2.5s ease-in-out infinite}
+            @keyframes hintPulse{0%,100%{opacity:0.3}50%{opacity:0.8}}
+            .music-indicator{position:absolute;bottom:calc(16px + var(--safe-bottom));right:14px;z-index:20;background:rgba(0,0,0,0.4);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:22px;padding:8px 14px;border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;gap:6px;font-size:0.7rem;font-weight:600;color:#fff;cursor:pointer}
+            .music-indicator .dot{width:6px;height:6px;border-radius:50%;background:#4ade80;animation:pulse 1.2s ease-in-out infinite;display:none}
+            .music-indicator .dot.playing{display:block}
+            .music-indicator .dot.paused{display:block;background:#fb923c;animation:none}
+            @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.3;transform:scale(1.6)}}
+            .btn-back-home{position:absolute;top:max(50px,calc(var(--safe-top) + 38px));left:12px;z-index:20;background:rgba(0,0,0,0.35);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.7);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:0.8rem;display:flex;align-items:center;justify-content:center}
+            .hidden-audio{display:none}
         </style>
         </head>
         <body>
         <div class="petals-container" id="petalsContainer"></div>
-        <nav class="navbar">
-            <button class="nav-btn active" data-section="memories">💌 我们的回忆</button>
-            <button class="nav-btn" data-section="status">💔 目前的状态</button>
-            <button class="nav-btn" data-section="solution">💡 解决办法</button>
-            <button class="nav-btn" data-section="future">🌈 未来会好的</button>
-        </nav>
-        <div class="main-container">
-            <div class="section active" id="section-memories">
-                <div class="section-title"><h2><span class="icon">💌</span> 我们的回忆</h2></div>
-                <div id="content-memories"></div>
+        <div class="page active" id="pageHome"><div class="home-page"><div class="home-title" id="homeTitle"></div><div class="home-subtitle" id="homeSubtitle"></div><div class="home-modules" id="homeModules"><div class="home-module-card" data-section="memories"><div class="module-icon">💌</div><div class="module-label">我们的回忆</div></div><div class="home-module-card" data-section="status"><div class="module-icon">💔</div><div class="module-label">目前的状态</div></div><div class="home-module-card" data-section="solution"><div class="module-icon">💡</div><div class="module-label">解决办法</div></div><div class="home-module-card" data-section="future"><div class="module-icon">🌈</div><div class="module-label">未来会好的</div></div></div><button class="btn-start" id="btnStart">轻触开始</button></div></div>
+        <div class="page content-page" id="pageContent">
+            <div class="section-tabs" id="sectionTabs">
+                <button class="section-tab active" data-section="memories">💌 回忆</button>
+                <button class="section-tab" data-section="status">💔 状态</button>
+                <button class="section-tab" data-section="solution">💡 办法</button>
+                <button class="section-tab" data-section="future">🌈 未来</button>
             </div>
-            <div class="section" id="section-status">
-                <div class="section-title"><h2><span class="icon">💔</span> 目前的状态</h2></div>
-                <div id="content-status"></div>
-            </div>
-            <div class="section" id="section-solution">
-                <div class="section-title"><h2><span class="icon">💡</span> 解决办法</h2></div>
-                <div id="content-solution"></div>
-            </div>
-            <div class="section" id="section-future">
-                <div class="section-title"><h2><span class="icon">🌈</span> 未来会好的</h2></div>
-                <div id="content-future"></div>
-            </div>
-        </div>
-        <div class="music-indicator" id="musicIndicator" title="点击切换播放/暂停">
-            <span class="dot" id="musicDot"></span>
-            <span id="musicLabel">🎵 未播放</span>
+            <button class="btn-back-home" id="btnBackHome">←</button>
+            <div class="carousel-container" id="carouselContainer"><div class="carousel-track" id="carouselTrack"></div></div>
+            <div class="nav-indicators" id="navIndicators"></div>
+            <div class="swipe-hint" id="swipeHint">← 左右滑动翻阅 →</div>
+            <div class="music-indicator" id="musicIndicator"><span class="dot" id="musicDot"></span><span id="musicLabel">🎵</span></div>
         </div>
         <audio id="bgMusic" loop class="hidden-audio"></audio>
         <script>
         (function(){
-            const EMBEDDED_DATA = `{
-        "memories": {
-                "pairs": [
-                        {
-                                "type": "image",
-                                "url": "https://gips2.baidu.com/it/u=3313679121,637406067&fm=3074&app=3074&f=PNG",
-                                "text": "还记得我们第一次见面吗？那天阳光很好，你穿了一件我永远忘不了的衣服。"
-                        },
-                        {
-                                "type": "image",
-                                "url": "",
-                                "text": "一起走过的那些日子，每一个瞬间都刻在我心里。"
-                        },
-                        {
-                                "type": "image",
-                                "url": "",
-                                "text": "啊啊啊啊啊啊啊啊啊啊啊啊啊"
-                        },
-                        {
-                                "type": "image",
-                                "url": "",
-                                "text": " 啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊"
-                        }
-                ]
-        },
-        "status": {
-                "pairs": [
-                        {
-                                "type": "image",
-                                "url": "",
-                                "text": "我们分开了...但这不代表我们之间的感情消失了。"
-                        },
-                        {
-                                "type": "image",
-                                "url": "",
-                                "text": "我每天都在想你，想知道你过得好不好。"
-                        }
-                ]
-        },
-        "solution": {
-                "pairs": [
-                        {
-                                "type": "image",
-                                "url": "",
-                                "text": "我想了很多，我知道问题出在哪里了。"
-                        },
-                        {
-                                "type": "image",
-                                "url": "",
-                                "text": "我会改，真的会改。不是因为我想挽回你，而是因为我想成为更好的人。"
-                        }
-                ]
-        },
-        "future": {
-                "pairs": [
-                        {
-                                "type": "image",
-                                "url": "",
-                                "text": "我相信我们还有未来。"
-                        },
-                        {
-                                "type": "image",
-                                "url": "",
-                                "text": "给我一个机会，让我们重新开始，好吗？💗"
-                        }
-                ]
-        },
-        "musicUrl": "https://music.163.com/song/media/outer/url?id=3356010050.mp3"
-}`;
-            const pageData = JSON.parse(EMBEDDED_DATA);
-
-            // 渲染板块
-            const contentContainers={
-                memories:document.getElementById('content-memories'),
-                status:document.getElementById('content-status'),
-                solution:document.getElementById('content-solution'),
-                future:document.getElementById('content-future')
-            };
-
-            function renderSection(key){
-                const container=contentContainers[key];
-                const pairs=pageData[key].pairs||[];
-                container.innerHTML='';
-                pairs.forEach(pair=>{
-                    const block=document.createElement('div');
-                    block.className='content-block';
-                    if(pair.url&&pair.url.trim()){
-                        const mediaDiv=document.createElement('div');
-                        mediaDiv.className='block-media has-media';
-                        if(pair.type==='video'){
-                            const v=document.createElement('video');
-                            v.src=pair.url.trim();v.controls=true;v.playsinline=true;v.preload='metadata';
-                            mediaDiv.appendChild(v);
-                        }else{
-                            const i=document.createElement('img');
-                            i.src=pair.url.trim();i.alt='';i.loading='lazy';
-                            mediaDiv.appendChild(i);
-                        }
-                        block.appendChild(mediaDiv);
-                    }
-                    const textDiv=document.createElement('div');
-                    textDiv.className='block-text';
-                    textDiv.textContent=pair.text||'';
-                    block.appendChild(textDiv);
-                    container.appendChild(block);
+            const EMBEDDED_DATA=\`${embeddedData}\`;
+            const pageData=JSON.parse(EMBEDDED_DATA);
+            let allSlides=[],sectionIndexMap={},currentSlideIndex=0,currentSection='memories',musicStarted=false;
+            document.getElementById('homeTitle').textContent=pageData.homeTitle||'💗';
+            document.getElementById('homeSubtitle').textContent=pageData.homeSubtitle||'';
+            function buildAllSlides(){
+                allSlides=[];sectionIndexMap={};
+                ['memories','status','solution','future'].forEach(s=>{sectionIndexMap[s]={start:allSlides.length,count:pageData[s].pairs.length};pageData[s].pairs.forEach(p=>allSlides.push({section:s,type:p.type,url:p.url,text:p.text}));});
+            }
+            const pageHome=document.getElementById('pageHome'),pageContent=document.getElementById('pageContent'),
+                carouselTrack=document.getElementById('carouselTrack'),carouselContainer=document.getElementById('carouselContainer'),
+                navIndicators=document.getElementById('navIndicators'),swipeHint=document.getElementById('swipeHint'),
+                sectionTabs=document.querySelectorAll('#sectionTabs .section-tab'),btnStart=document.getElementById('btnStart'),
+                btnBackHome=document.getElementById('btnBackHome'),bgMusic=document.getElementById('bgMusic'),
+                musicDot=document.getElementById('musicDot'),musicLabel=document.getElementById('musicLabel'),musicIndicator=document.getElementById('musicIndicator'),
+                homeModules=document.getElementById('homeModules');
+            function escapeHTML(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+            function renderCarousel(){
+                buildAllSlides();carouselTrack.innerHTML='';navIndicators.innerHTML='';
+                allSlides.forEach((slide,i)=>{
+                    const sd=document.createElement('div');sd.className='slide';sd.style.left=(i*100)+'%';
+                    const bg=document.createElement('div');bg.className='slide-bg';
+                    if(slide.url&&slide.url.trim()){
+                        if(slide.type==='video'){const v=document.createElement('video');v.src=slide.url.trim();v.loop=true;v.muted=true;v.playsinline=true;v.autoplay=true;v.setAttribute('playsinline','');v.setAttribute('webkit-playsinline','');bg.appendChild(v)}
+                        else{const im=document.createElement('img');im.src=slide.url.trim();bg.appendChild(im)}
+                    }else{const nm=document.createElement('div');nm.className='no-media';bg.appendChild(nm)}
+                    sd.appendChild(bg);const ov=document.createElement('div');ov.className='slide-overlay';sd.appendChild(ov);
+                    const td=document.createElement('div');td.className='slide-text';td.innerHTML='<div class="text-inner">'+escapeHTML(slide.text||'')+'</div>';sd.appendChild(td);
+                    carouselTrack.appendChild(sd);const dot=document.createElement('span');dot.className='nav-dot';dot.addEventListener('click',()=>goToSlide(i));navIndicators.appendChild(dot);
                 });
+                updateCarouselPosition(0);updateIndicators();updateActiveTab();
             }
-            ['memories','status','solution','future'].forEach(renderSection);
-
-            // 音乐
-            const bgMusic=document.getElementById('bgMusic');
-            const musicDot=document.getElementById('musicDot');
-            const musicLabel=document.getElementById('musicLabel');
-            const musicIndicator=document.getElementById('musicIndicator');
-            let musicPlayAttempted=false;
-
-            function updateUI(s){
-                musicDot.classList.remove('playing','paused');
-                switch(s){
-                    case'playing':musicDot.classList.add('playing');musicLabel.textContent='🎵 正在播放';musicIndicator.style.color='#16a34a';break;
-                    case'paused':musicDot.classList.add('paused');musicLabel.textContent='⏸️ 已暂停';musicIndicator.style.color='#ea580c';break;
-                    case'blocked':musicDot.classList.add('paused');musicLabel.textContent='🔇 点击任意位置播放';musicIndicator.style.color='#ea580c';break;
-                    default:musicLabel.textContent='🎵 未播放';musicIndicator.style.color='#ff5286';
-                }
-            }
-
-            function playMusic(){
-                if(!bgMusic.src&&pageData.musicUrl){bgMusic.src=pageData.musicUrl;bgMusic.load();}
-                bgMusic.play().then(()=>updateUI('playing')).catch(()=>updateUI('blocked'));
-            }
-            function toggleMusic(){
-                if(bgMusic.paused||bgMusic.ended)playMusic();
-                else{bgMusic.pause();updateUI('paused');}
-            }
-
-            bgMusic.addEventListener('play',()=>updateUI('playing'));
-            bgMusic.addEventListener('pause',()=>{if(bgMusic.src&&!bgMusic.ended)updateUI('paused');});
-            musicIndicator.addEventListener('click',toggleMusic);
-
-            function attemptAutoPlay(){
-                if(!musicPlayAttempted){
-                    musicPlayAttempted=true;
-                    if(pageData.musicUrl&&pageData.musicUrl.trim()){
-                        if(!bgMusic.src||bgMusic.src!==pageData.musicUrl.trim()){
-                            bgMusic.src=pageData.musicUrl.trim();bgMusic.load();
-                        }
-                        bgMusic.play().then(()=>updateUI('playing')).catch(()=>updateUI('blocked'));
-                    }
-                }
-            }
-            document.addEventListener('click',attemptAutoPlay,{once:false});
-            document.addEventListener('touchstart',attemptAutoPlay,{once:false});
-            document.addEventListener('scroll',attemptAutoPlay,{once:true});
-            window.addEventListener('load',()=>{setTimeout(attemptAutoPlay,500);});
-
-            // 导航
-            const navBtns=document.querySelectorAll('.nav-btn');
-            const sections={memories:document.getElementById('section-memories'),status:document.getElementById('section-status'),solution:document.getElementById('section-solution'),future:document.getElementById('section-future')};
-            navBtns.forEach(btn=>{
-                btn.addEventListener('click',()=>{
-                    navBtns.forEach(b=>b.classList.remove('active'));
-                    btn.classList.add('active');
-                    const key=btn.dataset.section;
-                    Object.values(sections).forEach(s=>s.classList.remove('active'));
-                    sections[key].classList.add('active');
-                    attemptAutoPlay();
-                });
-            });
-
-            // 花瓣
-            const petals=['🌸','💮','🌷','🩷','✨','💗','🌺','💖'];
-            const container=document.getElementById('petalsContainer');
-            for(let i=0;i<25;i++){
-                const p=document.createElement('span');
-                p.className='petal';
-                p.textContent=petals[Math.floor(Math.random()*petals.length)];
-                p.style.left=Math.random()*100+'%';
-                p.style.fontSize=(Math.random()*1.5+0.8)+'rem';
-                p.style.animationDuration=(Math.random()*8+8)+'s';
-                p.style.animationDelay=Math.random()*10+'s';
-                p.style.opacity=Math.random()*0.5+0.3;
-                container.appendChild(p);
-            }
-
-            // 初始加载音乐
-            if(pageData.musicUrl){bgMusic.src=pageData.musicUrl;bgMusic.load();}
+            function updateCarouselPosition(anim){if(!anim)carouselTrack.style.transition='none';else carouselTrack.style.transition='transform 0.5s cubic-bezier(0.25,0.1,0.25,1)';carouselTrack.style.transform='translateX(-'+(currentSlideIndex*100)+'%)';if(!anim)requestAnimationFrame(()=>{carouselTrack.style.transition='transform 0.5s cubic-bezier(0.25,0.1,0.25,1)'});updateIndicators();updateActiveTab();playCurrentVideo()}
+            function updateIndicators(){const dots=navIndicators.querySelectorAll('.nav-dot');dots.forEach((d,i)=>d.classList.toggle('active',i===currentSlideIndex))}
+            function updateActiveTab(){const slide=allSlides[currentSlideIndex];if(slide){currentSection=slide.section;sectionTabs.forEach(t=>{t.classList.remove('active');if(t.dataset.section===slide.section)t.classList.add('active')})}}
+            function playCurrentVideo(){const vs=carouselTrack.querySelectorAll('video');vs.forEach((v,i)=>{if(i===currentSlideIndex)v.play().catch(()=>{});else v.pause()})}
+            function goToSlide(i){if(i<0)i=0;if(i>=allSlides.length)i=allSlides.length-1;currentSlideIndex=i;updateCarouselPosition(true)}
+            let tsX=0,tsY=0,tcX=0,isDragging=false,dragOffset=0;
+            carouselContainer.addEventListener('touchstart',e=>{tsX=e.touches[0].clientX;tsY=e.touches[0].clientY;tcX=tsX;isDragging=true;dragOffset=0;carouselTrack.style.transition='none';swipeHint.style.opacity='0'},{passive:true});
+            carouselContainer.addEventListener('touchmove',e=>{if(!isDragging)return;tcX=e.touches[0].clientX;dragOffset=tcX-tsX;carouselTrack.style.transform='translateX('+(-currentSlideIndex*100+(dragOffset/carouselContainer.offsetWidth)*100)+'%)'},{passive:true});
+            carouselContainer.addEventListener('touchend',()=>{if(!isDragging)return;isDragging=false;carouselTrack.style.transition='transform 0.5s cubic-bezier(0.25,0.1,0.25,1)';const t=35;if(dragOffset<-t&&currentSlideIndex<allSlides.length-1)currentSlideIndex++;else if(dragOffset>t&&currentSlideIndex>0)currentSlideIndex--;updateCarouselPosition(true);dragOffset=0;setTimeout(()=>{swipeHint.style.opacity='1'},1500)});
+            sectionTabs.forEach(tab=>{tab.addEventListener('click',()=>{const sec=tab.dataset.section;const map=sectionIndexMap[sec];if(map&&map.count>0){currentSlideIndex=map.start;updateCarouselPosition(true)}})});
+            homeModules.addEventListener('click',e=>{const card=e.target.closest('.home-module-card');if(!card)return;const sec=card.dataset.section;pageHome.classList.remove('active');pageContent.classList.add('active');startMusic();const map=sectionIndexMap[sec];if(map&&map.count>0){currentSlideIndex=map.start;updateCarouselPosition(true)}sectionTabs.forEach(t=>{t.classList.remove('active');if(t.dataset.section===sec)t.classList.add('active')})});
+            function updateUI(s){musicDot.classList.remove('playing','paused');switch(s){case'playing':musicDot.classList.add('playing');break;case'paused':musicDot.classList.add('paused');break;case'blocked':musicDot.classList.add('paused');break}}
+            function startMusic(){if(musicStarted)return;musicStarted=true;if(!bgMusic.src&&pageData.musicUrl){bgMusic.src=pageData.musicUrl;bgMusic.load()}bgMusic.play().then(()=>updateUI('playing')).catch(()=>updateUI('blocked'))}
+            function toggleMusic(){if(bgMusic.paused||bgMusic.ended){if(!bgMusic.src&&pageData.musicUrl){bgMusic.src=pageData.musicUrl;bgMusic.load()}bgMusic.play().then(()=>updateUI('playing')).catch(()=>updateUI('blocked'))}else{bgMusic.pause();updateUI('paused')}}
+            bgMusic.addEventListener('play',()=>updateUI('playing'));bgMusic.addEventListener('pause',()=>{if(bgMusic.src&&!bgMusic.ended)updateUI('paused')});musicIndicator.addEventListener('click',toggleMusic);
+            btnStart.addEventListener('click',()=>{pageHome.classList.remove('active');pageContent.classList.add('active');startMusic();const map=sectionIndexMap['memories'];if(map&&map.count>0){currentSlideIndex=map.start;updateCarouselPosition(true)}});
+            btnBackHome.addEventListener('click',()=>{pageContent.classList.remove('active');pageHome.classList.add('active');bgMusic.pause();updateUI('paused')});
+            const petals=['🌸','💮','🌷','🩷','✨','💗','🌺','💖'];const pc=document.getElementById('petalsContainer');
+            for(let i=0;i<25;i++){const p=document.createElement('span');p.className='petal';p.textContent=petals[Math.floor(Math.random()*petals.length)];p.style.left=Math.random()*100+'%';p.style.fontSize=(Math.random()*1.2+0.7)+'rem';p.style.animationDuration=(Math.random()*8+8)+'s';p.style.animationDelay=Math.random()*10+'s';p.style.opacity=Math.random()*0.4+0.25;pc.appendChild(p)}
+            if(pageData.musicUrl){bgMusic.src=pageData.musicUrl;bgMusic.load()}
+            renderCarousel();
         })();
-        </script>
+        <\/script>
         </body>
-        </html>
+        </html>`;
+            }
+
+            function showToast(msg) {
+                const existing = document.querySelector('.toast');
+                if (existing) existing.remove();
+                const t = document.createElement('div');
+                t.className = 'toast';
+                t.textContent = msg;
+                document.body.appendChild(t);
+                setTimeout(() => { t.style.opacity = '0';
+                    t.style.transition = 'opacity 0.3s';
+                    setTimeout(() => t.remove(), 300); }, 1800);
+            }
+
+            function createPetals() {
+                const container = document.getElementById('petalsContainer');
+                const petals = ['🌸', '💮', '🌷', '🩷', '✨', '💗', '🌺', '💖'];
+                for (let i = 0; i < 25; i++) {
+                    const petal = document.createElement('span');
+                    petal.className = 'petal';
+                    petal.textContent = petals[Math.floor(Math.random() * petals.length)];
+                    petal.style.left = Math.random() * 100 + '%';
+                    petal.style.fontSize = (Math.random() * 1.2 + 0.7) + 'rem';
+                    petal.style.animationDuration = (Math.random() * 8 + 8) + 's';
+                    petal.style.animationDelay = Math.random() * 10 + 's';
+                    petal.style.opacity = Math.random() * 0.4 + 0.25;
+                    container.appendChild(petal);
+                }
+            }
+
+            function init() {
+                createPetals();
+                updateHomePage();
+                renderCarousel();
+                loadMusicUrl();
+                passwordOverlay.classList.add('hidden');
+                configFullscreen.classList.remove('active');
+                pageHome.classList.add('active');
+                pageContent.classList.remove('active');
+            }
+
+            init();
+        })();
+    </script>
+</body>
+</html>
