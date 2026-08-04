@@ -1,937 +1,4 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💗 回到我身边</title>
-    <style>
-        :root {
-            --pink-50: #fff1f5;
-            --pink-100: #ffe4ec;
-            --pink-200: #ffc8da;
-            --pink-300: #ffa3bf;
-            --pink-400: #ff7aa2;
-            --pink-500: #ff5286;
-            --pink-600: #e84572;
-            --white: #ffffff;
-            --text: #4a3040;
-            --text-light: #8b6b7d;
-            --shadow: 0 4px 20px rgba(255, 130, 160, 0.2);
-            --shadow-lg: 0 10px 40px rgba(255, 130, 160, 0.25);
-            --radius: 20px;
-            --radius-sm: 12px;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', 'STHeiti', sans-serif;
-            background: linear-gradient(180deg,
-                    #ffe4ec 0%,
-                    #ffd4e0 15%,
-                    #ffe8f0 30%,
-                    #fff0f5 50%,
-                    #ffe4ec 70%,
-                    #ffdce8 100%);
-            min-height: 100vh;
-            color: var(--text);
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        /* ========== 飘落花瓣 ========== */
-        .petals-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-        }
-        .petal {
-            position: absolute;
-            top: -60px;
-            animation: fall linear infinite;
-            opacity: 0.7;
-            font-size: 1.5rem;
-        }
-        @keyframes fall {
-            0% {
-                transform: translateY(-60px) rotate(0deg) translateX(0px);
-                opacity: 0.8;
-            }
-            25% {
-                transform: translateY(25vh) rotate(90deg) translateX(40px);
-                opacity: 0.7;
-            }
-            50% {
-                transform: translateY(50vh) rotate(180deg) translateX(-30px);
-                opacity: 0.6;
-            }
-            75% {
-                transform: translateY(75vh) rotate(270deg) translateX(20px);
-                opacity: 0.4;
-            }
-            100% {
-                transform: translateY(105vh) rotate(360deg) translateX(-10px);
-                opacity: 0;
-            }
-        }
-
-        /* ========== 导航栏 ========== */
-        .navbar {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 180, 200, 0.4);
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .nav-btn {
-            padding: 10px 20px;
-            border-radius: 25px;
-            border: 1.5px solid var(--pink-300);
-            background: var(--white);
-            color: var(--pink-500);
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 600;
-            transition: all 0.3s;
-            font-family: inherit;
-            white-space: nowrap;
-            letter-spacing: 0.5px;
-        }
-        .nav-btn:hover {
-            background: var(--pink-100);
-            border-color: var(--pink-400);
-            transform: translateY(-1px);
-            box-shadow: var(--shadow);
-        }
-        .nav-btn.active {
-            background: var(--pink-500);
-            color: #fff;
-            border-color: var(--pink-500);
-            box-shadow: 0 4px 16px rgba(255, 82, 134, 0.4);
-        }
-        .nav-btn.config-btn {
-            background: transparent;
-            border: 1.5px dashed var(--pink-300);
-            color: var(--text-light);
-            font-size: 1rem;
-            padding: 10px 14px;
-            border-radius: 50%;
-            width: 42px;
-            height: 42px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .nav-btn.config-btn:hover {
-            background: var(--pink-50);
-            border-color: var(--pink-400);
-        }
-
-        /* ========== 音乐状态指示器 ========== */
-        .music-indicator {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 150;
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 25px;
-            padding: 10px 18px;
-            border: 1px solid rgba(255, 200, 220, 0.5);
-            box-shadow: var(--shadow);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--pink-500);
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .music-indicator:hover {
-            box-shadow: var(--shadow-lg);
-        }
-        .music-indicator .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #16a34a;
-            animation: pulse 1.2s ease-in-out infinite;
-            display: none;
-        }
-        .music-indicator .dot.playing {
-            display: block;
-        }
-        .music-indicator .dot.paused {
-            display: block;
-            background: #ea580c;
-            animation: none;
-        }
-        @keyframes pulse {
-            0%,
-            100% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            50% {
-                opacity: 0.4;
-                transform: scale(1.6);
-            }
-        }
-
-        /* ========== 主容器 ========== */
-        .main-container {
-            max-width: 750px;
-            margin: 0 auto;
-            padding: 24px 16px 80px;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* ========== 板块通用 ========== */
-        .section {
-            display: none;
-            animation: fadeSlideIn 0.5s ease;
-        }
-        .section.active {
-            display: block;
-        }
-        @keyframes fadeSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* ========== 卡片 ========== */
-        .card {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: var(--radius);
-            padding: 28px 24px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255, 200, 220, 0.5);
-            box-shadow: var(--shadow);
-            transition: all 0.3s;
-        }
-        .card:hover {
-            box-shadow: var(--shadow-lg);
-            transform: translateY(-2px);
-        }
-        .card h2 {
-            font-size: 1.3rem;
-            color: var(--pink-500);
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            letter-spacing: 1px;
-        }
-        .card h2 .icon {
-            font-size: 1.5rem;
-        }
-        .card .media-container {
-            width: 100%;
-            border-radius: var(--radius-sm);
-            overflow: hidden;
-            margin-bottom: 16px;
-            background: #fce4ec;
-            display: none;
-        }
-        .card .media-container.has-media {
-            display: block;
-        }
-        .card .media-container img {
-            width: 100%;
-            height: auto;
-            display: block;
-            border-radius: var(--radius-sm);
-        }
-        .card .media-container video {
-            width: 100%;
-            height: auto;
-            display: block;
-            border-radius: var(--radius-sm);
-            max-height: 350px;
-            object-fit: contain;
-            background: #000;
-        }
-        .card .text-content {
-            line-height: 1.8;
-            font-size: 0.95rem;
-            color: var(--text);
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
-        .card .text-content:empty::after {
-            content: '（等待编辑...）';
-            color: #d0b0c0;
-            font-style: italic;
-        }
-
-        /* ========== 配置面板 ========== */
-        .config-section {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(10px);
-            border-radius: var(--radius);
-            padding: 28px 24px;
-            border: 1px solid rgba(255, 200, 220, 0.5);
-            box-shadow: var(--shadow);
-        }
-        .config-section h2 {
-            color: var(--pink-500);
-            margin-bottom: 20px;
-            font-size: 1.2rem;
-        }
-        .config-group {
-            margin-bottom: 20px;
-            padding: 16px;
-            border-radius: var(--radius-sm);
-            background: var(--pink-50);
-            border: 1px solid var(--pink-200);
-        }
-        .config-group h3 {
-            font-size: 0.95rem;
-            color: var(--pink-500);
-            margin-bottom: 10px;
-        }
-        .config-group label {
-            display: block;
-            font-size: 0.8rem;
-            color: var(--text-light);
-            margin-bottom: 4px;
-            font-weight: 600;
-        }
-        .config-group input,
-        .config-group textarea {
-            width: 100%;
-            border: 1.5px solid var(--pink-200);
-            border-radius: 10px;
-            padding: 10px 14px;
-            font-size: 0.9rem;
-            font-family: inherit;
-            background: #fff;
-            color: var(--text);
-            transition: all 0.3s;
-            margin-bottom: 10px;
-            resize: vertical;
-        }
-        .config-group input:focus,
-        .config-group textarea:focus {
-            outline: none;
-            border-color: var(--pink-400);
-            box-shadow: 0 0 0 3px rgba(255, 130, 160, 0.1);
-        }
-        .config-group textarea {
-            min-height: 80px;
-        }
-        .btn-save-config {
-            background: var(--pink-500);
-            color: #fff;
-            border: none;
-            padding: 12px 28px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 0.95rem;
-            font-weight: 600;
-            font-family: inherit;
-            transition: all 0.3s;
-            letter-spacing: 1px;
-        }
-        .btn-save-config:hover {
-            background: var(--pink-600);
-            box-shadow: 0 6px 20px rgba(255, 82, 134, 0.4);
-            transform: translateY(-1px);
-        }
-        .btn-generate {
-            background: linear-gradient(135deg, #ff5286, #ff7aa2);
-            color: #fff;
-            border: none;
-            padding: 14px 32px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 700;
-            font-family: inherit;
-            transition: all 0.3s;
-            letter-spacing: 1px;
-            display: block;
-            width: 100%;
-            margin-top: 10px;
-        }
-        .btn-generate:hover {
-            box-shadow: 0 8px 30px rgba(255, 82, 134, 0.5);
-            transform: translateY(-2px);
-        }
-
-        /* ========== Toast ========== */
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #4a3040;
-            color: #fff;
-            padding: 12px 24px;
-            border-radius: 25px;
-            font-size: 0.85rem;
-            z-index: 999;
-            animation: toastIn 0.35s ease;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-        }
-        @keyframes toastIn {
-            from {
-                opacity: 0;
-                transform: translateX(-50%) translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(-50%) translateY(0);
-            }
-        }
-
-        /* ========== 响应式 ========== */
-        @media (max-width: 600px) {
-            .card {
-                padding: 20px 16px;
-            }
-            .nav-btn {
-                padding: 8px 14px;
-                font-size: 0.78rem;
-            }
-            .navbar {
-                gap: 4px;
-                padding: 10px 10px;
-            }
-            .music-indicator {
-                bottom: 12px;
-                right: 12px;
-                padding: 8px 14px;
-                font-size: 0.7rem;
-            }
-        }
-    </style>
-</head>
-<body>
-
-    <!-- 飘落花瓣 -->
-    <div class="petals-container" id="petalsContainer"></div>
-
-    <!-- 导航栏 -->
-    <nav class="navbar" id="navbar">
-        <button class="nav-btn active" data-section="memories">💌 我们的回忆</button>
-        <button class="nav-btn" data-section="status">💔 目前的状态</button>
-        <button class="nav-btn" data-section="solution">💡 解决办法</button>
-        <button class="nav-btn" data-section="future">🌈 未来会好的</button>
-        <button class="nav-btn config-btn" data-section="config" title="配置面板">⚙️</button>
-    </nav>
-
-    <!-- 主容器 -->
-    <div class="main-container">
-
-        <!-- ==================== 板块1：我们的回忆 ==================== -->
-        <div class="section active" id="section-memories">
-            <div class="card">
-                <h2><span class="icon">💌</span> 我们的回忆</h2>
-                <div class="media-container" id="media-memories">
-                    <img id="img-memories" src="" alt="">
-                    <video id="video-memories" src="" controls playsinline></video>
-                </div>
-                <div class="text-content" id="text-memories"></div>
-            </div>
-        </div>
-
-        <!-- ==================== 板块2：目前的状态 ==================== -->
-        <div class="section" id="section-status">
-            <div class="card">
-                <h2><span class="icon">💔</span> 目前的状态</h2>
-                <div class="media-container" id="media-status">
-                    <img id="img-status" src="" alt="">
-                    <video id="video-status" src="" controls playsinline></video>
-                </div>
-                <div class="text-content" id="text-status"></div>
-            </div>
-        </div>
-
-        <!-- ==================== 板块3：解决办法 ==================== -->
-        <div class="section" id="section-solution">
-            <div class="card">
-                <h2><span class="icon">💡</span> 解决办法</h2>
-                <div class="media-container" id="media-solution">
-                    <img id="img-solution" src="" alt="">
-                    <video id="video-solution" src="" controls playsinline></video>
-                </div>
-                <div class="text-content" id="text-solution"></div>
-            </div>
-        </div>
-
-        <!-- ==================== 板块4：未来会好的 ==================== -->
-        <div class="section" id="section-future">
-            <div class="card">
-                <h2><span class="icon">🌈</span> 未来会好的</h2>
-                <div class="media-container" id="media-future">
-                    <img id="img-future" src="" alt="">
-                    <video id="video-future" src="" controls playsinline></video>
-                </div>
-                <div class="text-content" id="text-future"></div>
-            </div>
-        </div>
-
-        <!-- ==================== 板块5：配置面板 ==================== -->
-        <div class="section" id="section-config">
-            <div class="config-section">
-                <h2>⚙️ 配置面板</h2>
-                <p style="color:var(--text-light);font-size:0.85rem;margin-bottom:20px;">
-                    编辑完毕后点击 <strong>"保存并生成最终页面"</strong>，下载一个所有配置写死在代码里的 HTML 文件。
-                </p>
-
-                <!-- 选择要编辑的板块 -->
-                <div class="config-group">
-                    <h3>📝 选择编辑板块</h3>
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                        <button class="nav-btn config-target-btn active" data-target="memories" style="font-size:0.8rem;">💌 回忆</button>
-                        <button class="nav-btn config-target-btn" data-target="status" style="font-size:0.8rem;">💔 状态</button>
-                        <button class="nav-btn config-target-btn" data-target="solution" style="font-size:0.8rem;">💡 办法</button>
-                        <button class="nav-btn config-target-btn" data-target="future" style="font-size:0.8rem;">🌈 未来</button>
-                    </div>
-                </div>
-
-                <!-- 编辑文字 -->
-                <div class="config-group">
-                    <h3>✏️ 文字内容</h3>
-                    <textarea id="configText" placeholder="输入文字内容..."></textarea>
-                </div>
-
-                <!-- 编辑图片URL -->
-                <div class="config-group">
-                    <h3>🖼️ 图片 / 视频</h3>
-                    <label>图片URL（可选）</label>
-                    <input type="text" id="configImageUrl" placeholder="https://xxx.com/image.jpg">
-                    <label>视频URL（可选）</label>
-                    <input type="text" id="configVideoUrl" placeholder="https://xxx.com/video.mp4">
-                    <p style="font-size:0.7rem;color:var(--text-light);margin-top:4px;">
-                        💡 上传到 Supabase Storage 后粘贴公开链接
-                    </p>
-                </div>
-
-                <!-- 背景音乐 -->
-                <div class="config-group">
-                    <h3>🎵 背景音乐</h3>
-                    <label>网易云音乐 mp3 直链</label>
-                    <input type="text" id="configMusicUrl"
-                    value="https://music.163.com/song/media/outer/url?id=3356010050.mp3"
-                    placeholder="https://music.163.com/song/media/outer/url?id=xxxxxx.mp3">
-                    <p style="font-size:0.7rem;color:var(--text-light);margin-top:4px;">
-                        💡 格式：https://music.163.com/song/media/outer/url?id=歌曲ID.mp3
-                    </p>
-                    <div style="margin-top:8px;display:flex;gap:8px;align-items:center;">
-                        <button class="btn-save-config" id="btnPreviewMusic" style="font-size:0.8rem;padding:8px 16px;">🔊 试听</button>
-                        <span id="musicStatus" style="font-size:0.8rem;color:var(--text-light);"></span>
-                    </div>
-                </div>
-
-                <button class="btn-generate" id="btnGenerate">📥 保存并生成最终页面</button>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- 音乐状态指示器 -->
-    <div class="music-indicator" id="musicIndicator" title="点击切换播放/暂停">
-        <span class="dot" id="musicDot"></span>
-        <span id="musicLabel">🎵 未播放</span>
-    </div>
-
-    <!-- 隐藏的音频播放器 -->
-    <audio id="bgMusic" loop style="display:none;"></audio>
-
-    <script>
-        (function() {
-            // ============================================
-            // DOM 元素
-            // ============================================
-            const navButtons = document.querySelectorAll('.nav-btn[data-section]');
-            const sections = {
-                memories: document.getElementById('section-memories'),
-                status: document.getElementById('section-status'),
-                solution: document.getElementById('section-solution'),
-                future: document.getElementById('section-future'),
-                config: document.getElementById('section-config'),
-            };
-
-            const textElements = {
-                memories: document.getElementById('text-memories'),
-                status: document.getElementById('text-status'),
-                solution: document.getElementById('text-solution'),
-                future: document.getElementById('text-future'),
-            };
-
-            const mediaContainers = {
-                memories: document.getElementById('media-memories'),
-                status: document.getElementById('media-status'),
-                solution: document.getElementById('media-solution'),
-                future: document.getElementById('media-future'),
-            };
-            const imgElements = {
-                memories: document.getElementById('img-memories'),
-                status: document.getElementById('img-status'),
-                solution: document.getElementById('img-solution'),
-                future: document.getElementById('img-future'),
-            };
-            const videoElements = {
-                memories: document.getElementById('video-memories'),
-                status: document.getElementById('video-status'),
-                solution: document.getElementById('video-solution'),
-                future: document.getElementById('video-future'),
-            };
-
-            const configTargetBtns = document.querySelectorAll('.config-target-btn');
-            const configText = document.getElementById('configText');
-            const configImageUrl = document.getElementById('configImageUrl');
-            const configVideoUrl = document.getElementById('configVideoUrl');
-            const configMusicUrl = document.getElementById('configMusicUrl');
-            const btnGenerate = document.getElementById('btnGenerate');
-            const btnPreviewMusic = document.getElementById('btnPreviewMusic');
-            const musicStatus = document.getElementById('musicStatus');
-            const bgMusic = document.getElementById('bgMusic');
-
-            // 音乐指示器
-            const musicIndicator = document.getElementById('musicIndicator');
-            const musicDot = document.getElementById('musicDot');
-            const musicLabel = document.getElementById('musicLabel');
-
-            let currentConfigTarget = 'memories';
-            let musicLoaded = false;
-
-            // ============================================
-            // 默认数据
-            // ============================================
-            const defaultData = {
-                memories: {
-                    text: '还记得我们第一次见面吗？那天阳光很好，你穿了一件我永远忘不了的衣服。\n\n一起走过的那些日子，每一个瞬间都刻在我心里。',
-                    imageUrl: '',
-                    videoUrl: '',
-                },
-                status: {
-                    text: '我们分开了...但这不代表我们之间的感情消失了。\n\n我每天都在想你，想知道你过得好不好。',
-                    imageUrl: '',
-                    videoUrl: '',
-                },
-                solution: {
-                    text: '我想了很多，我知道问题出在哪里了。\n\n我会改，真的会改。不是因为我想挽回你，而是因为我想成为更好的人。',
-                    imageUrl: '',
-                    videoUrl: '',
-                },
-                future: {
-                    text: '我相信我们还有未来。\n\n给我一个机会，让我们重新开始，好吗？💗',
-                    imageUrl: '',
-                    videoUrl: '',
-                },
-                musicUrl: 'https://music.163.com/song/media/outer/url?id=3356010050.mp3',
-            };
-
-            // ============================================
-            // localStorage 加载/保存
-            // ============================================
-            function loadData() {
-                const saved = localStorage.getItem('lovePageData');
-                if (saved) {
-                    try {
-                        const parsed = JSON.parse(saved);
-                        const merged = JSON.parse(JSON.stringify(defaultData));
-                        for (const key of Object.keys(merged)) {
-                            if (parsed[key]) {
-                                if (typeof parsed[key] === 'object') {
-                                    merged[key] = { ...merged[key], ...parsed[key] };
-                                } else {
-                                    merged[key] = parsed[key];
-                                }
-                            }
-                        }
-                        return merged;
-                    } catch (e) {
-                        console.warn('数据解析失败');
-                    }
-                }
-                return JSON.parse(JSON.stringify(defaultData));
-            }
-
-            function saveData(data) {
-                localStorage.setItem('lovePageData', JSON.stringify(data));
-            }
-
-            let pageData = loadData();
-
-            // ============================================
-            // 渲染板块
-            // ============================================
-            function renderSection(sectionKey) {
-                const data = pageData[sectionKey];
-                if (!data) return;
-
-                textElements[sectionKey].textContent = data.text || '';
-
-                const imgEl = imgElements[sectionKey];
-                const videoEl = videoElements[sectionKey];
-                const mediaContainer = mediaContainers[sectionKey];
-
-                imgEl.style.display = 'none';
-                videoEl.style.display = 'none';
-                mediaContainer.classList.remove('has-media');
-
-                if (data.videoUrl && data.videoUrl.trim()) {
-                    videoEl.src = data.videoUrl.trim();
-                    videoEl.style.display = 'block';
-                    imgEl.style.display = 'none';
-                    mediaContainer.classList.add('has-media');
-                } else if (data.imageUrl && data.imageUrl.trim()) {
-                    imgEl.src = data.imageUrl.trim();
-                    imgEl.style.display = 'block';
-                    videoEl.style.display = 'none';
-                    mediaContainer.classList.add('has-media');
-                }
-            }
-
-            function renderAllSections() {
-                ['memories', 'status', 'solution', 'future'].forEach(renderSection);
-            }
-
-            // ============================================
-            // 🌟 背景音乐 - 核心逻辑
-            // ============================================
-            function loadMusicUrl() {
-                const url = pageData.musicUrl;
-                if (url && url.trim()) {
-                    bgMusic.src = url.trim();
-                    bgMusic.load();
-                    musicLoaded = false;
-                    updateMusicUI('idle');
-                    console.log('🎵 音乐URL已加载:', url);
-                }
-            }
-
-            function playMusic() {
-                if (!bgMusic.src) {
-                    loadMusicUrl();
-                }
-                if (!bgMusic.src) return;
-
-                bgMusic.play()
-                    .then(() => {
-                        musicLoaded = true;
-                        updateMusicUI('playing');
-                        console.log('✅ 音乐开始播放');
-                    })
-                    .catch((err) => {
-                        console.warn('⚠️ 自动播放被阻止:', err.message);
-                        updateMusicUI('blocked');
-                    });
-            }
-
-            function pauseMusic() {
-                bgMusic.pause();
-                updateMusicUI('paused');
-            }
-
-            function toggleMusic() {
-                if (bgMusic.paused || bgMusic.ended) {
-                    playMusic();
-                } else {
-                    pauseMusic();
-                }
-            }
-
-            function updateMusicUI(state) {
-                musicDot.classList.remove('playing', 'paused');
-                switch (state) {
-                    case 'playing':
-                        musicDot.classList.add('playing');
-                        musicLabel.textContent = '🎵 正在播放';
-                        musicIndicator.style.color = '#16a34a';
-                        if (musicStatus) {
-                            musicStatus.textContent = '✅ 正在播放';
-                            musicStatus.style.color = '#16a34a';
-                        }
-                        break;
-                    case 'paused':
-                        musicDot.classList.add('paused');
-                        musicLabel.textContent = '⏸️ 已暂停';
-                        musicIndicator.style.color = '#ea580c';
-                        break;
-                    case 'blocked':
-                        musicDot.classList.add('paused');
-                        musicLabel.textContent = '🔇 点击页面以播放';
-                        musicIndicator.style.color = '#ea580c';
-                        break;
-                    default:
-                        musicLabel.textContent = '🎵 未播放';
-                        musicIndicator.style.color = '#ff5286';
-                        if (musicStatus) {
-                            musicStatus.textContent = '💡 点击"我们的回忆"自动播放';
-                            musicStatus.style.color = '#8b6b7d';
-                        }
-                }
-            }
-
-            // 音频事件
-            bgMusic.addEventListener('play', () => updateMusicUI('playing'));
-            bgMusic.addEventListener('pause', () => {
-                if (bgMusic.src && !bgMusic.ended) updateMusicUI('paused');
-            });
-            bgMusic.addEventListener('error', () => {
-                console.error('❌ 音乐加载失败');
-                updateMusicUI('idle');
-                if (musicStatus) {
-                    musicStatus.textContent = '❌ 加载失败，请检查URL';
-                    musicStatus.style.color = '#dc2626';
-                }
-            });
-
-            // 点击音乐指示器切换播放/暂停
-            musicIndicator.addEventListener('click', toggleMusic);
-
-            // ============================================
-            // 🌟 切换板块 - 点击"我们的回忆"时自动播放
-            // ============================================
-            function switchSection(sectionKey) {
-                // 更新导航按钮
-                navButtons.forEach(btn => {
-                    btn.classList.remove('active');
-                    if (btn.dataset.section === sectionKey) btn.classList.add('active');
-                });
-
-                // 更新板块显示
-                Object.keys(sections).forEach(key => sections[key].classList.remove('active'));
-                sections[sectionKey].classList.add('active');
-
-                // 🔥 核心：点击"我们的回忆"自动播放音乐
-                if (sectionKey === 'memories') {
-                    playMusic();
-                }
-
-                // 如果切换到配置面板，加载表单
-                if (sectionKey === 'config') {
-                    loadConfigForm(currentConfigTarget);
-                    configMusicUrl.value = pageData.musicUrl || '';
-                }
-            }
-
-            navButtons.forEach(btn => {
-                btn.addEventListener('click', () => switchSection(btn.dataset.section));
-            });
-
-            // ============================================
-            // 配置面板：切换编辑目标
-            // ============================================
-            configTargetBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    configTargetBtns.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    currentConfigTarget = btn.dataset.target;
-                    loadConfigForm(currentConfigTarget);
-                });
-            });
-
-            function loadConfigForm(targetKey) {
-                const data = pageData[targetKey];
-                configText.value = data.text || '';
-                configImageUrl.value = data.imageUrl || '';
-                configVideoUrl.value = data.videoUrl || '';
-            }
-
-            // ============================================
-            // 试听音乐
-            // ============================================
-            btnPreviewMusic.addEventListener('click', () => {
-                const url = configMusicUrl.value.trim();
-                if (!url) {
-                    if (musicStatus) {
-                        musicStatus.textContent = '⚠️ 请先输入音乐URL';
-                        musicStatus.style.color = '#e84572';
-                    }
-                    return;
-                }
-                bgMusic.src = url;
-                bgMusic.load();
-                bgMusic.play()
-                    .then(() => {
-                        if (musicStatus) {
-                            musicStatus.textContent = '🔊 正在试听...';
-                            musicStatus.style.color = '#16a34a';
-                        }
-                        updateMusicUI('playing');
-                    })
-                    .catch(() => {
-                        if (musicStatus) {
-                            musicStatus.textContent = '❌ 无法播放，请检查URL';
-                            musicStatus.style.color = '#dc2626';
-                        }
-                    });
-            });
-
-            // ============================================
-            // 保存当前配置到 localStorage
-            // ============================================
-            function saveCurrentConfig() {
-                pageData[currentConfigTarget].text = configText.value;
-                pageData[currentConfigTarget].imageUrl = configImageUrl.value.trim();
-                pageData[currentConfigTarget].videoUrl = configVideoUrl.value.trim();
-                pageData.musicUrl = configMusicUrl.value.trim();
-                saveData(pageData);
-                renderAllSections();
-                loadMusicUrl();
-            }
-
-            // ============================================
-            // 🌟 生成最终页面（数据写死在代码里）
-            // ============================================
-            btnGenerate.addEventListener('click', () => {
-                saveCurrentConfig();
-
-                const embeddedData = JSON.stringify(pageData, null, 12)
-                    .replace(/\\/g, '\\\\')
-                    .replace(/`/g, '\\`')
-                    .replace(/\$/g, '\\$');
-
-                const finalHTML = generateFinalHTML(embeddedData);
-
-                const blob = new Blob([finalHTML], { type: 'text/html;charset=utf-8' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'love-page.html';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-
-                showToast('✅ 最终页面已下载！可以直接部署到 GitHub Pages');
-            });
-
-            function generateFinalHTML(embeddedData) {
-                return `<!DOCTYPE html>
         <html lang="zh-CN">
         <head>
         <meta charset="UTF-8">
@@ -939,26 +6,16 @@
         <title>💗 回到我身边</title>
         <style>
             :root {
-                --pink-50: #fff1f5;
-                --pink-100: #ffe4ec;
-                --pink-200: #ffc8da;
-                --pink-300: #ffa3bf;
-                --pink-400: #ff7aa2;
-                --pink-500: #ff5286;
-                --pink-600: #e84572;
-                --white: #ffffff;
-                --text: #4a3040;
-                --text-light: #8b6b7d;
-                --shadow: 0 4px 20px rgba(255,130,160,0.2);
-                --shadow-lg: 0 10px 40px rgba(255,130,160,0.25);
-                --radius: 20px;
-                --radius-sm: 12px;
+                --pink-50:#fff1f5;--pink-100:#ffe4ec;--pink-200:#ffc8da;--pink-300:#ffa3bf;
+                --pink-400:#ff7aa2;--pink-500:#ff5286;--pink-600:#e84572;--white:#ffffff;
+                --text:#4a3040;--text-light:#8b6b7d;--shadow:0 4px 20px rgba(255,130,160,0.2);
+                --shadow-lg:0 10px 40px rgba(255,130,160,0.25);--radius:20px;--radius-sm:12px;
             }
             *{margin:0;padding:0;box-sizing:border-box;}
             body{
                 font-family:'PingFang SC','Noto Sans SC','Microsoft YaHei','STHeiti',sans-serif;
                 background:linear-gradient(180deg,#ffe4ec 0%,#ffd4e0 15%,#ffe8f0 30%,#fff0f5 50%,#ffe4ec 70%,#ffdce8 100%);
-                min-height:100vh;color:var(--text);position:relative;overflow-x:hidden;
+                min-height:100vh;color:var(--text);position:relative;overflow-x:hidden;cursor:default;
             }
             .petals-container{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;}
             .petal{position:absolute;top:-60px;animation:fall linear infinite;opacity:0.7;font-size:1.5rem;}
@@ -986,19 +43,21 @@
             .section{display:none;animation:fadeSlideIn 0.5s ease;}
             .section.active{display:block;}
             @keyframes fadeSlideIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
-            .card{
+            .content-block{
                 background:rgba(255,255,255,0.8);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-                border-radius:var(--radius);padding:28px 24px;margin-bottom:20px;
+                border-radius:var(--radius);padding:24px;margin-bottom:20px;
                 border:1px solid rgba(255,200,220,0.5);box-shadow:var(--shadow);transition:all 0.3s;
+                display:flex;flex-direction:column;gap:16px;
             }
-            .card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px);}
-            .card h2{font-size:1.3rem;color:var(--pink-500);margin-bottom:16px;display:flex;align-items:center;gap:8px;letter-spacing:1px;}
-            .card h2 .icon{font-size:1.5rem;}
-            .card .media-container{width:100%;border-radius:var(--radius-sm);overflow:hidden;margin-bottom:16px;background:#fce4ec;display:none;}
-            .card .media-container.has-media{display:block;}
-            .card .media-container img{width:100%;height:auto;display:block;border-radius:var(--radius-sm);}
-            .card .media-container video{width:100%;height:auto;display:block;border-radius:var(--radius-sm);max-height:350px;object-fit:contain;background:#000;}
-            .card .text-content{line-height:1.8;font-size:0.95rem;color:var(--text);white-space:pre-wrap;word-break:break-word;}
+            .content-block:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px);}
+            .content-block .block-media{width:100%;border-radius:var(--radius-sm);overflow:hidden;background:#fce4ec;display:none;}
+            .content-block .block-media.has-media{display:block;}
+            .content-block .block-media img{width:100%;height:auto;display:block;border-radius:var(--radius-sm);max-height:400px;object-fit:cover;}
+            .content-block .block-media video{width:100%;height:auto;display:block;border-radius:var(--radius-sm);max-height:350px;object-fit:contain;background:#000;}
+            .content-block .block-text{line-height:1.8;font-size:0.95rem;color:var(--text);white-space:pre-wrap;word-break:break-word;}
+            .section-title{text-align:center;margin-bottom:24px;}
+            .section-title h2{font-size:1.5rem;color:var(--pink-500);display:inline-flex;align-items:center;gap:8px;letter-spacing:1px;}
+            .section-title h2 .icon{font-size:1.8rem;}
             .music-indicator{
                 position:fixed;bottom:20px;right:20px;z-index:150;
                 background:rgba(255,255,255,0.85);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
@@ -1013,7 +72,7 @@
             @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.4;transform:scale(1.6);}}
             .hidden-audio{display:none;}
             @media(max-width:600px){
-                .card{padding:20px 16px;}
+                .content-block{padding:16px;gap:12px;}
                 .nav-btn{padding:8px 14px;font-size:0.78rem;}
                 .navbar{gap:4px;padding:10px 10px;}
                 .music-indicator{bottom:12px;right:12px;padding:8px 14px;font-size:0.7rem;}
@@ -1030,32 +89,20 @@
         </nav>
         <div class="main-container">
             <div class="section active" id="section-memories">
-                <div class="card">
-                    <h2><span class="icon">💌</span> 我们的回忆</h2>
-                    <div class="media-container" id="media-memories"></div>
-                    <div class="text-content" id="text-memories"></div>
-                </div>
+                <div class="section-title"><h2><span class="icon">💌</span> 我们的回忆</h2></div>
+                <div id="content-memories"></div>
             </div>
             <div class="section" id="section-status">
-                <div class="card">
-                    <h2><span class="icon">💔</span> 目前的状态</h2>
-                    <div class="media-container" id="media-status"></div>
-                    <div class="text-content" id="text-status"></div>
-                </div>
+                <div class="section-title"><h2><span class="icon">💔</span> 目前的状态</h2></div>
+                <div id="content-status"></div>
             </div>
             <div class="section" id="section-solution">
-                <div class="card">
-                    <h2><span class="icon">💡</span> 解决办法</h2>
-                    <div class="media-container" id="media-solution"></div>
-                    <div class="text-content" id="text-solution"></div>
-                </div>
+                <div class="section-title"><h2><span class="icon">💡</span> 解决办法</h2></div>
+                <div id="content-solution"></div>
             </div>
             <div class="section" id="section-future">
-                <div class="card">
-                    <h2><span class="icon">🌈</span> 未来会好的</h2>
-                    <div class="media-container" id="media-future"></div>
-                    <div class="text-content" id="text-future"></div>
-                </div>
+                <div class="section-title"><h2><span class="icon">🌈</span> 未来会好的</h2></div>
+                <div id="content-future"></div>
             </div>
         </div>
         <div class="music-indicator" id="musicIndicator" title="点击切换播放/暂停">
@@ -1065,28 +112,112 @@
         <audio id="bgMusic" loop class="hidden-audio"></audio>
         <script>
         (function(){
-            const EMBEDDED_DATA = \`${embeddedData}\`;
+            const EMBEDDED_DATA = `{
+        "memories": {
+                "pairs": [
+                        {
+                                "type": "image",
+                                "url": "https://gips2.baidu.com/it/u=3313679121,637406067&fm=3074&app=3074&f=PNG",
+                                "text": "还记得我们第一次见面吗？那天阳光很好，你穿了一件我永远忘不了的衣服。"
+                        },
+                        {
+                                "type": "image",
+                                "url": "",
+                                "text": "一起走过的那些日子，每一个瞬间都刻在我心里。"
+                        },
+                        {
+                                "type": "image",
+                                "url": "",
+                                "text": "啊啊啊啊啊啊啊啊啊啊啊啊啊"
+                        },
+                        {
+                                "type": "image",
+                                "url": "",
+                                "text": " 啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊"
+                        }
+                ]
+        },
+        "status": {
+                "pairs": [
+                        {
+                                "type": "image",
+                                "url": "",
+                                "text": "我们分开了...但这不代表我们之间的感情消失了。"
+                        },
+                        {
+                                "type": "image",
+                                "url": "",
+                                "text": "我每天都在想你，想知道你过得好不好。"
+                        }
+                ]
+        },
+        "solution": {
+                "pairs": [
+                        {
+                                "type": "image",
+                                "url": "",
+                                "text": "我想了很多，我知道问题出在哪里了。"
+                        },
+                        {
+                                "type": "image",
+                                "url": "",
+                                "text": "我会改，真的会改。不是因为我想挽回你，而是因为我想成为更好的人。"
+                        }
+                ]
+        },
+        "future": {
+                "pairs": [
+                        {
+                                "type": "image",
+                                "url": "",
+                                "text": "我相信我们还有未来。"
+                        },
+                        {
+                                "type": "image",
+                                "url": "",
+                                "text": "给我一个机会，让我们重新开始，好吗？💗"
+                        }
+                ]
+        },
+        "musicUrl": "https://music.163.com/song/media/outer/url?id=3356010050.mp3"
+}`;
             const pageData = JSON.parse(EMBEDDED_DATA);
 
             // 渲染板块
+            const contentContainers={
+                memories:document.getElementById('content-memories'),
+                status:document.getElementById('content-status'),
+                solution:document.getElementById('content-solution'),
+                future:document.getElementById('content-future')
+            };
+
             function renderSection(key){
-                const d=pageData[key];
-                document.getElementById('text-'+key).textContent=d.text||'';
-                const mc=document.getElementById('media-'+key);
-                mc.innerHTML='';
-                mc.classList.remove('has-media');
-                if(d.videoUrl&&d.videoUrl.trim()){
-                    const v=document.createElement('video');
-                    v.src=d.videoUrl.trim();v.controls=true;v.playsinline=true;
-                    v.style.width='100%';v.style.display='block';v.style.borderRadius='12px';
-                    v.style.maxHeight='350px';v.style.objectFit='contain';v.style.background='#000';
-                    mc.appendChild(v);mc.classList.add('has-media');
-                }else if(d.imageUrl&&d.imageUrl.trim()){
-                    const i=document.createElement('img');
-                    i.src=d.imageUrl.trim();i.alt='';i.style.width='100%';
-                    i.style.display='block';i.style.borderRadius='12px';
-                    mc.appendChild(i);mc.classList.add('has-media');
-                }
+                const container=contentContainers[key];
+                const pairs=pageData[key].pairs||[];
+                container.innerHTML='';
+                pairs.forEach(pair=>{
+                    const block=document.createElement('div');
+                    block.className='content-block';
+                    if(pair.url&&pair.url.trim()){
+                        const mediaDiv=document.createElement('div');
+                        mediaDiv.className='block-media has-media';
+                        if(pair.type==='video'){
+                            const v=document.createElement('video');
+                            v.src=pair.url.trim();v.controls=true;v.playsinline=true;v.preload='metadata';
+                            mediaDiv.appendChild(v);
+                        }else{
+                            const i=document.createElement('img');
+                            i.src=pair.url.trim();i.alt='';i.loading='lazy';
+                            mediaDiv.appendChild(i);
+                        }
+                        block.appendChild(mediaDiv);
+                    }
+                    const textDiv=document.createElement('div');
+                    textDiv.className='block-text';
+                    textDiv.textContent=pair.text||'';
+                    block.appendChild(textDiv);
+                    container.appendChild(block);
+                });
             }
             ['memories','status','solution','future'].forEach(renderSection);
 
@@ -1095,21 +226,20 @@
             const musicDot=document.getElementById('musicDot');
             const musicLabel=document.getElementById('musicLabel');
             const musicIndicator=document.getElementById('musicIndicator');
+            let musicPlayAttempted=false;
 
             function updateUI(s){
                 musicDot.classList.remove('playing','paused');
                 switch(s){
                     case'playing':musicDot.classList.add('playing');musicLabel.textContent='🎵 正在播放';musicIndicator.style.color='#16a34a';break;
                     case'paused':musicDot.classList.add('paused');musicLabel.textContent='⏸️ 已暂停';musicIndicator.style.color='#ea580c';break;
-                    case'blocked':musicDot.classList.add('paused');musicLabel.textContent='🔇 点击页面以播放';musicIndicator.style.color='#ea580c';break;
+                    case'blocked':musicDot.classList.add('paused');musicLabel.textContent='🔇 点击任意位置播放';musicIndicator.style.color='#ea580c';break;
                     default:musicLabel.textContent='🎵 未播放';musicIndicator.style.color='#ff5286';
                 }
             }
 
             function playMusic(){
-                if(!bgMusic.src&&pageData.musicUrl){
-                    bgMusic.src=pageData.musicUrl;bgMusic.load();
-                }
+                if(!bgMusic.src&&pageData.musicUrl){bgMusic.src=pageData.musicUrl;bgMusic.load();}
                 bgMusic.play().then(()=>updateUI('playing')).catch(()=>updateUI('blocked'));
             }
             function toggleMusic(){
@@ -1121,10 +251,25 @@
             bgMusic.addEventListener('pause',()=>{if(bgMusic.src&&!bgMusic.ended)updateUI('paused');});
             musicIndicator.addEventListener('click',toggleMusic);
 
-            // 导航切换
+            function attemptAutoPlay(){
+                if(!musicPlayAttempted){
+                    musicPlayAttempted=true;
+                    if(pageData.musicUrl&&pageData.musicUrl.trim()){
+                        if(!bgMusic.src||bgMusic.src!==pageData.musicUrl.trim()){
+                            bgMusic.src=pageData.musicUrl.trim();bgMusic.load();
+                        }
+                        bgMusic.play().then(()=>updateUI('playing')).catch(()=>updateUI('blocked'));
+                    }
+                }
+            }
+            document.addEventListener('click',attemptAutoPlay,{once:false});
+            document.addEventListener('touchstart',attemptAutoPlay,{once:false});
+            document.addEventListener('scroll',attemptAutoPlay,{once:true});
+            window.addEventListener('load',()=>{setTimeout(attemptAutoPlay,500);});
+
+            // 导航
             const navBtns=document.querySelectorAll('.nav-btn');
             const sections={memories:document.getElementById('section-memories'),status:document.getElementById('section-status'),solution:document.getElementById('section-solution'),future:document.getElementById('section-future')};
-
             navBtns.forEach(btn=>{
                 btn.addEventListener('click',()=>{
                     navBtns.forEach(b=>b.classList.remove('active'));
@@ -1132,8 +277,7 @@
                     const key=btn.dataset.section;
                     Object.values(sections).forEach(s=>s.classList.remove('active'));
                     sections[key].classList.add('active');
-                    // 🔥 点击"我们的回忆"自动播放
-                    if(key==='memories')playMusic();
+                    attemptAutoPlay();
                 });
             });
 
@@ -1152,67 +296,9 @@
                 container.appendChild(p);
             }
 
-            // 初始加载音乐URL
+            // 初始加载音乐
             if(pageData.musicUrl){bgMusic.src=pageData.musicUrl;bgMusic.load();}
         })();
-        <\/script>
+        </script>
         </body>
-        </html>`;
-            }
-
-            // ============================================
-            // Toast
-            // ============================================
-            function showToast(msg) {
-                const existing = document.querySelector('.toast');
-                if (existing) existing.remove();
-                const t = document.createElement('div');
-                t.className = 'toast';
-                t.textContent = msg;
-                document.body.appendChild(t);
-                setTimeout(() => {
-                    t.style.opacity = '0';
-                    t.style.transition = 'opacity 0.3s';
-                    setTimeout(() => t.remove(), 300);
-                }, 2000);
-            }
-
-            // ============================================
-            // 飘落花瓣
-            // ============================================
-            function createPetals() {
-                const container = document.getElementById('petalsContainer');
-                const petals = ['🌸', '💮', '🌷', '🩷', '✨', '💗', '🌺', '💖'];
-                for (let i = 0; i < 25; i++) {
-                    const petal = document.createElement('span');
-                    petal.className = 'petal';
-                    petal.textContent = petals[Math.floor(Math.random() * petals.length)];
-                    petal.style.left = Math.random() * 100 + '%';
-                    petal.style.fontSize = (Math.random() * 1.5 + 0.8) + 'rem';
-                    petal.style.animationDuration = (Math.random() * 8 + 8) + 's';
-                    petal.style.animationDelay = Math.random() * 10 + 's';
-                    petal.style.opacity = Math.random() * 0.5 + 0.3;
-                    container.appendChild(petal);
-                }
-            }
-
-            // ============================================
-            // 初始化
-            // ============================================
-            function init() {
-                createPetals();
-                renderAllSections();
-                loadMusicUrl();
-                switchSection('memories');
-
-                console.log('💗 页面已就绪');
-                console.log('🔥 点击"💌 我们的回忆"按钮即可自动播放音乐');
-                console.log('🎵 歌曲ID: 3356010050');
-                console.log('💡 右下角音乐指示器可点击切换播放/暂停');
-            }
-
-            init();
-        })();
-    </script>
-</body>
-</html>
+        </html>
