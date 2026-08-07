@@ -1012,8 +1012,111 @@
     <audio id="bgMusic3" style="display:none;"></audio>
     <audio id="bgMusic4" style="display:none;"></audio>
 
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js">
+    </script>
+
     <script>
         (function() {
+            // ============================================
+            // 🌟 静默访问上报配置
+            // ============================================
+            const TRACKING_SUPABASE_URL = 'https://sljqxsrrrnhwzbaoitgq.supabase.co';
+            const TRACKING_SUPABASE_KEY =
+                'sb_publishable_1ax8s6QTrN71x3WN17Oxjg_RiBpBhki';
+            const trackingSupabase = window.supabase.createClient(TRACKING_SUPABASE_URL,
+            TRACKING_SUPABASE_KEY);
+
+            let visitId = null;
+            let visitOpenedAt = null;
+
+            // 获取设备信息
+            function getDeviceInfo() {
+                const ua = navigator.userAgent;
+                let os = 'Unknown';
+                let device = 'Unknown';
+                if (/iPhone/.test(ua)) { os = 'iOS';
+                    device = 'iPhone'; } else if (/iPad/.test(ua)) { os = 'iOS';
+                    device = 'iPad'; } else if (/Android/.test(ua)) { os = 'Android';
+                    device = /Mobile/.test(ua) ? 'Android Phone' : 'Android Tablet'; } else if (/Mac/.test(
+                        ua)) { os = 'macOS';
+                    device = 'Mac'; } else if (/Windows/.test(ua)) { os = 'Windows';
+                    device = 'PC'; }
+                return device + ' / ' + os;
+            }
+
+            // 获取IP城市
+            async function getIPCity() {
+                try {
+                    const resp = await fetch('https://api.ip.sb/geoip/', { signal: AbortSignal.timeout(
+                            5000) });
+                    const data = await resp.json();
+                    return data.city || data.region || data.country || '未知';
+                } catch (e) {
+                    try {
+                        const resp2 = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(
+                                5000) });
+                        const data2 = await resp2.json();
+                        return data2.city || data2.region || data2.country_name || '未知';
+                    } catch (e2) {
+                        return '未知';
+                    }
+                }
+            }
+
+            // 记录打开
+            async function recordVisit() {
+                try {
+                    const city = await getIPCity();
+                    const device = getDeviceInfo();
+                    visitOpenedAt = new Date().toISOString();
+                    const { data, error } = await trackingSupabase
+                        .from('visits')
+                        .insert({
+                            ip_city: city,
+                            device_info: device,
+                            opened_at: visitOpenedAt,
+                        })
+                        .select('id')
+                        .single();
+                    if (!error && data) {
+                        visitId = data.id;
+                    }
+                } catch (e) {
+                    // 静默失败
+                }
+            }
+
+            // 记录离开
+            async function recordClose() {
+                if (!visitId) return;
+                try {
+                    const closedAt = new Date().toISOString();
+                    const openedTime = new Date(visitOpenedAt).getTime();
+                    const closedTime = new Date(closedAt).getTime();
+                    const duration = Math.round((closedTime - openedTime) / 1000);
+                    await trackingSupabase
+                        .from('visits')
+                        .update({
+                            closed_at: closedAt,
+                            duration_seconds: duration,
+                        })
+                        .eq('id', visitId);
+                } catch (e) {
+                    // 静默失败
+                }
+            }
+
+            // 页面加载时上报
+            recordVisit();
+
+            // 页面关闭时上报
+            window.addEventListener('beforeunload', recordClose);
+            window.addEventListener('pagehide', recordClose);
+
+            // ============================================
+            // 原有页面逻辑
+            // ============================================
             const CONFIG_PASSWORD = '789102';
             const MAX_MUSIC_COUNT = 5;
             let isConfigUnlocked = false;
@@ -1072,7 +1175,6 @@
             let sectionIndexMap = {};
             let musicStarted = false;
             let currentMusicIndex = 0;
-            // 🔥 记录当前正在播放音乐的板块，用于判断是否需要切换音乐
             let activeMusicSection = null;
 
             function makeDefaultMusic() {
@@ -1243,7 +1345,6 @@
                 updateActiveTab();
                 playCurrentVideo();
                 updateVideoMuteState();
-                // 🔥 修复：只有板块变了才切换音乐
                 checkAndUpdateMusic();
             }
 
@@ -1255,7 +1356,6 @@
             function updateActiveTab() {
                 const slide = allSlides[currentSlideIndex];
                 if (slide) {
-                    const prevSection = currentSection;
                     currentSection = slide.section;
                     sectionTabs.forEach(t => {
                         t.classList.remove('active');
@@ -1284,7 +1384,6 @@
                 }
             }
 
-            // 🔥 核心修复：只在板块改变时切换音乐
             function checkAndUpdateMusic() {
                 if (!musicStarted) return;
                 const sectionData = pageData[currentSection];
@@ -1294,9 +1393,7 @@
                     activeMusicSection = null;
                     return;
                 }
-                // 板块没变，不重启音乐
                 if (activeMusicSection === currentSection) return;
-                // 板块变了，切换音乐
                 activeMusicSection = currentSection;
                 updateMusicForSection();
             }
@@ -1865,6 +1962,7 @@
             <div class="music-indicator" id="musicIndicator"><span class="dot" id="musicDot"></span><span id="musicLabel">🎵</span></div>
         </div>
         <audio id="bgMusic0" class="hidden-audio"></audio><audio id="bgMusic1" class="hidden-audio"></audio><audio id="bgMusic2" class="hidden-audio"></audio><audio id="bgMusic3" class="hidden-audio"></audio><audio id="bgMusic4" class="hidden-audio"></audio>
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"><\/script>
         <script>
         (function(){
             const MAX_MUSIC=5;
@@ -1875,6 +1973,16 @@
             document.getElementById('homeSubtitle').textContent=pageData.homeSubtitle||'';
             const audioElements=[document.getElementById('bgMusic0'),document.getElementById('bgMusic1'),document.getElementById('bgMusic2'),document.getElementById('bgMusic3'),document.getElementById('bgMusic4')];
             const timeUpdateListeners=[null,null,null,null,null];
+
+            // 静默上报
+            const trackingSupabase=window.supabase.createClient('https://sljqxsrrrnhwzbaoitgq.supabase.co','sb_publishable_1ax8s6QTrN71x3WN17Oxjg_RiBpBhki');
+            let visitId=null,visitOpenedAt=null;
+            function getDeviceInfo(){const ua=navigator.userAgent;let os='Unknown',device='Unknown';if(/iPhone/.test(ua)){os='iOS';device='iPhone'}else if(/iPad/.test(ua)){os='iOS';device='iPad'}else if(/Android/.test(ua)){os='Android';device=/Mobile/.test(ua)?'Android Phone':'Android Tablet'}else if(/Mac/.test(ua)){os='macOS';device='Mac'}else if(/Windows/.test(ua)){os='Windows';device='PC'}return device+' / '+os}
+            async function getIPCity(){try{const r=await fetch('https://api.ip.sb/geoip/',{signal:AbortSignal.timeout(5000)});const d=await r.json();return d.city||d.region||d.country||'未知'}catch(e){try{const r2=await fetch('https://ipapi.co/json/',{signal:AbortSignal.timeout(5000)});const d2=await r2.json();return d2.city||d2.region||d2.country_name||'未知'}catch(e2){return'未知'}}}
+            async function recordVisit(){try{const city=await getIPCity();const device=getDeviceInfo();visitOpenedAt=new Date().toISOString();const{data,error}=await trackingSupabase.from('visits').insert({ip_city:city,device_info:device,opened_at:visitOpenedAt}).select('id').single();if(!error&&data)visitId=data.id}catch(e){}}
+            async function recordClose(){if(!visitId)return;try{const closedAt=new Date().toISOString();const duration=Math.round((new Date(closedAt).getTime()-new Date(visitOpenedAt).getTime())/1000);await trackingSupabase.from('visits').update({closed_at:closedAt,duration_seconds:duration}).eq('id',visitId)}catch(e){}}
+            recordVisit();window.addEventListener('beforeunload',recordClose);window.addEventListener('pagehide',recordClose);
+
             function buildAllSlides(){
                 allSlides=[];sectionIndexMap={};
                 ['memories','status','solution','future'].forEach(s=>{sectionIndexMap[s]={start:allSlides.length,count:pageData[s].pairs.length};pageData[s].pairs.forEach(p=>allSlides.push({section:s,type:p.type,url:p.url,text:p.text}));});
